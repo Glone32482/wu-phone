@@ -144,6 +144,29 @@ h1{font-size:clamp(34px,7vw,64px)} h2{font-size:clamp(22px,4vw,34px)} h3{font-si
 @keyframes pop{from{opacity:0;transform:scale(.8) translateY(20px)}}
 .alctl{position:sticky;bottom:0;z-index:10;display:flex;flex-wrap:wrap;gap:12px 14px;justify-content:center;align-items:center;padding:14px 8px;background:var(--bg);border-top:var(--bd);margin-top:10px}
 
+.ic{display:block;box-sizing:border-box}
+.ic.line{width:24px;height:3px;background:var(--k);transform:rotate(-38deg)}
+.ic.rect{width:22px;height:16px;border:3px solid var(--k)}
+.ic.ell{width:24px;height:17px;border:3px solid var(--k);border-radius:50%}
+.tb i{box-shadow:0 0 0 2px var(--k)}
+.btn.on{background:var(--y)}
+.reacts{flex-basis:100%;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.rx{width:52px;height:46px;font-size:24px}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;width:100%}
+.vcard{display:flex;flex-direction:column;gap:6px;text-align:left;font:inherit;color:inherit;background:#fff;border:var(--bd);border-radius:14px;box-shadow:var(--sh);padding:14px 16px;cursor:pointer;transition:transform .08s,box-shadow .08s}
+.vcard:disabled{opacity:.45;cursor:not-allowed}
+.vcard.on{background:var(--y);transform:translate(-2px,-2px) rotate(-1.2deg);box-shadow:7px 7px 0 var(--k)}
+.vnum{font-size:22px}
+.vname{font:700 14px/1.3 Manrope,sans-serif}
+.vtext{font:800 20px/1.25 Manrope,sans-serif;overflow-wrap:anywhere}
+.pod{display:flex;gap:16px;align-items:center;background:#fff;border:var(--bd);border-radius:14px;box-shadow:var(--sh);padding:14px 18px;margin-bottom:22px}
+.pod .medal{font-size:44px;line-height:1}
+.pod.first{background:var(--y);padding:22px}
+.pod.first .medal{font-size:72px}
+.pod.first .vtext{font-size:clamp(22px,3.4vw,30px)}
+#fly{position:fixed;inset:0;pointer-events:none;z-index:40;overflow:hidden}
+.flyer{position:absolute;bottom:-70px;line-height:1;animation:flyup 1.8s ease-out forwards}
+@keyframes flyup{to{transform:translateY(-110vh) rotate(18deg);opacity:.25}}
 #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,calc(100% + 40px));z-index:50;max-width:calc(100vw - 32px);font-weight:800;background:var(--k);color:#fff;border:3px solid #fff;border-radius:12px;padding:12px 18px;transition:transform .12s;text-align:center}
 #toast.on{transform:translate(-50%,0)}
 #offline{position:fixed;top:0;left:0;right:0;z-index:60;background:var(--p);border-bottom:var(--bd);text-align:center;font-weight:800;padding:8px}
@@ -164,6 +187,7 @@ h1{font-size:clamp(34px,7vw,64px)} h2{font-size:clamp(22px,4vw,34px)} h3{font-si
 <main id="app"></main>
 <div id="toast" role="status"></div>
 <div id="offline" hidden></div>
+<div id="fly" aria-hidden="true"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -191,6 +215,10 @@ const GRACE_MS = 4000;   // скільки ведучий чекає автов�
 const GONE_MS  = 8000;   // після стількох мс офлайну гравця не чекаємо
 const DAY_MS   = 24 * 60 * 60 * 1000;
 const IMG_W = 640, IMG_H = 480, IMG_MAX_CHARS = 68000; // ≈ 50 КБ у base64
+const REPLAY_MAX_CHARS = 40000;  // запис штрихів для анімації «як малювали»; довший просто не надсилаємо
+const VOTE_SEC = 30;             // час на голосування
+const HOST_GONE_MS = 12000;      // якщо ведучий офлайн довше — роль переходить до наступного гравця
+const REACTIONS = ['😂', '🔥', '😱', '❤️', '👏', '🤯', '💩'];
 
 /* =====================================================================
    3. УСІ ТЕКСТИ ІНТЕРФЕЙСУ
@@ -253,7 +281,27 @@ const T = {
   submitted: (a, b) => `Здали: ${a}/${b}`,
   forceNext: 'Завершити раунд зараз',
   forceConfirm: 'Завершити раунд для всіх просто зараз?',
-  tools: { brush: 'Пензель', eraser: 'Гумка', fill: 'Заливка', undo: 'Скасувати', clear: 'Очистити' },
+  tools: { brush: 'Пензель', eraser: 'Гумка', fill: 'Заливка', pick: 'Піпетка', line: 'Лінія', rect: 'Прямокутник', ellipse: 'Овал',
+           undo: 'Скасувати', redo: 'Повторити', clear: 'Очистити' },
+  replay: 'Показати, як малювали',
+  star: 'Найкращий малюнок',
+  vote: 'Голосування',
+  voteTitle: 'Обери найсмішніший ланцюжок',
+  voteHint: 'За власний ланцюжок голосувати не можна',
+  voted: (a, b) => `Проголосували: ${a}/${b}`,
+  voteMine: 'твій',
+  chainBy: name => `починає ${name}`,
+  showResults: 'Показати результати',
+  results: 'Результати',
+  resultsBtn: '🏆 Результати',
+  votesN: n => `голосів: ${n}`,
+  noVotes: 'Ніхто не проголосував 🤷',
+  bestDrawing: 'Найкращий малюнок',
+  showWinner: 'Показати ланцюжок-переможець',
+  downloadWinner: '⬇ Завантажити переможця',
+  backToAlbum: 'До альбому',
+  youHost: 'Тепер ти ведучий 👑',
+  newHost: name => `Новий ведучий — ${name}`,
   albumTitle: 'Альбом',
   chainOf: (i, n, name) => `Ланцюжок ${i}/${n} · починає ${name}`,
   stepOf: (i, n) => `Крок ${i} з ${n}`,
@@ -425,7 +473,9 @@ const S = {
   meta: null, players: {}, phase: null, loaded: {},
   joined: false, connected: false, offset: 0, offsetReady: false,
   submitting: false, beeped: null, muted: LS.get('muted', false),
-  album: { cache: {}, loading: null, key: null, shown: null }
+  album: { cache: {}, loading: null, key: null, shown: null },
+  votes: {}, titles: {}, myStars: new Set(), best: null, resKey: null,
+  claimAt: 0, reactAt: 0, lastReact: {}
 };
 let db, TS, refs = {}, curKey = null, work = null, hostBusy = false, lobbyCtlKey = null;
 
@@ -439,8 +489,10 @@ const roundKind = r => r === 0 ? 'write' : (r % 2 ? 'draw' : 'describe');
 // ланцюжок i в раунді r дістається гравцю (i + r) % N  ⇔  гравець p працює з ланцюжком (p − r) mod N
 const chainFor = (p, r, n) => (((p - r) % n) + n) % n;
 const isDone = id => !!(S.phase && S.phase.done && S.phase.done[id] === S.phase.round);
-const isGone = id => { const p = S.players[id]; return !p || (p.online === false && serverNow() - (p.lastSeen || 0) > GONE_MS); };
+const isGone = id => { const p = S.players[id]; return !p || (p.online === false && serverNow() - (p.lastSeen || serverNow()) > GONE_MS); };
 const deadline = () => S.phase.startedAt + S.phase.duration * 1000;
+const toArr = v => !v ? [] : Array.isArray(v) ? v : Object.values(v);
+const onlineIds = () => Object.keys(S.players).filter(id => S.players[id].online !== false);
 const eligible = () => {
   const st = settings();
   return Object.keys(S.players).filter(id => S.players[id].online !== false && (st.hostPlays || id !== S.meta.hostId));
@@ -503,11 +555,17 @@ function enterRoom(code) {
   S.room = code; S.loaded = {}; S.joined = false;
   const base = db.ref('rooms/' + code);
   refs = { base, meta: base.child('meta'), players: base.child('players'), phase: base.child('phase'),
-           chains: base.child('chains'), me: base.child('players/' + S.uid) };
+           chains: base.child('chains'), me: base.child('players/' + S.uid),
+           votes: base.child('votes'), stars: base.child('stars'), reactions: base.child('reactions') };
   const onErr = e => { console.error(e); toast(T.errGeneric); };
   refs.meta.on('value', s => {
+    const prev = S.meta && S.meta.hostId;
     S.meta = s.val(); S.loaded.meta = true;
     if (!S.meta) return leaveRoom(T.errNoRoom);
+    if (prev && prev !== S.meta.hostId) {                       // роль ведучого перейшла до іншого гравця
+      toast(S.meta.hostId === S.uid ? T.youHost : T.newHost((S.players[S.meta.hostId] || {}).name || '…'));
+      if (curKey && !curKey.endsWith(':work')) curKey = null;   // перемалювати екран із кнопками ведучого
+    }
     render();
   }, onErr);
   refs.players.on('value', s => {
@@ -519,12 +577,15 @@ function enterRoom(code) {
     render();
   }, onErr);
   refs.phase.on('value', s => { S.phase = s.val() || { state: 'lobby' }; S.loaded.phase = true; render(); }, onErr);
+  refs.votes.on('value', s => { S.votes = s.val() || {}; if (curKey === 'vote') render(); }, () => {});
+  refs.reactions.on('child_added', onReaction, () => {});
+  refs.reactions.on('child_changed', onReaction, () => {});
 }
 
 function leaveRoom(msg) {
   if (!S.room) return;
-  if (S.joined) { refs.me.child('online').onDisconnect().cancel(); refs.me.child('lastSeen').onDisconnect().cancel(); }
-  refs.meta.off(); refs.players.off(); refs.phase.off();
+  if (S.joined) refs.me.onDisconnect().cancel();
+  refs.meta.off(); refs.players.off(); refs.phase.off(); refs.votes.off(); refs.reactions.off();
   S.room = null; S.joined = false; S.meta = null; S.players = {}; S.phase = null; S.loaded = {};
   history.replaceState(null, '', location.pathname);
   if (msg) toast(msg);
@@ -532,8 +593,7 @@ function leaveRoom(msg) {
 }
 
 function presence() {
-  refs.me.child('online').onDisconnect().set(false);
-  refs.me.child('lastSeen').onDisconnect().set(TS);
+  refs.me.onDisconnect().update({ online: false, lastSeen: TS });   // одним записом, щоб «офлайн» і час приходили разом
   refs.me.update({ online: true }).catch(() => {});
 }
 
@@ -574,13 +634,15 @@ function joinRoom(profile) {
 /* =====================================================================
    9. ЛОГІКА ГРИ
    ===================================================================== */
+const clearGameData = () => Promise.all([refs.chains, refs.votes, refs.stars, refs.reactions].map(r => r.remove().catch(() => {})));
+
 async function startGame() {
   const ids = eligible();
   if (ids.length < 2) return toast(T.needPlayers);
   for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
   const st = settings();
   try {
-    await refs.chains.remove();
+    await clearGameData();
     await refs.phase.set({ state: 'play', round: 0, rounds: Math.min(ids.length, st.maxRounds), order: ids, startedAt: TS, duration: st.writeSec });
   } catch (e) { console.error(e); toast(T.errGeneric); }
 }
@@ -612,7 +674,7 @@ async function submit(auto) {
   const r = ph.round, p = myIdx(), n = order().length;
   if (p < 0) return;
   const step = { a: S.uid, n: me().name };
-  if (work.kind === 'draw') { step.t = 'draw'; step.v = work.pad.exportImage(); }
+  if (work.kind === 'draw') { step.t = 'draw'; step.v = work.pad.exportImage(); const rp = work.pad.exportReplay(); if (rp) step.p = rp; }
   else {
     let v = work.text().trim().slice(0, MAX_TEXT);
     if (!v) {
@@ -625,7 +687,9 @@ async function submit(auto) {
   work.btn.disabled = true; work.btn.textContent = T.sending;
   const doneRef = refs.phase.child('done/' + S.uid);
   try {
-    await refs.chains.child(chainFor(p, r, n) + '/steps/' + r).set(step);
+    const stepRef = refs.chains.child(chainFor(p, r, n) + '/steps/' + r);
+    try { await stepRef.set(step); }
+    catch (e) { if (!step.p) throw e; delete step.p; await stepRef.set(step); }   // напр. правила в базі ще старі
     await doneRef.set(r);
     clearDraft();
   } catch (e) {
@@ -638,28 +702,46 @@ async function submit(auto) {
   render();
 }
 
+// Якщо ведучий зник, його роль забирає перший за часом входу онлайн-гравець (правила це перевіряють)
+function checkHost(now) {
+  if (!S.room || !S.meta || !S.loaded.players || !me() || isHost() || !S.connected) return;
+  const hp = S.players[S.meta.hostId];
+  if (hp && !(hp.online === false && now - (hp.lastSeen || now) > HOST_GONE_MS)) return;
+  if (now - S.claimAt < 3000) return;
+  const first = onlineIds().sort((a, b) => (S.players[a].joinedAt || 0) - (S.players[b].joinedAt || 0) || (a < b ? -1 : 1))[0];
+  if (first !== S.uid) return;
+  S.claimAt = now;
+  refs.meta.child('hostId').transaction(() => S.uid, () => {}, false);
+}
+
 function tick() {
-  const ph = S.phase, timer = $('#timer'), bar = $('#bar');
-  const playing = !!(S.room && me() && ph && ph.state === 'play' && typeof ph.startedAt === 'number');
-  timer.hidden = bar.hidden = !playing;
-  if (!playing || !S.offsetReady) return;
-  const now = serverNow(), left = (deadline() - now) / 1000, sec = Math.max(0, Math.ceil(left));
+  const ph = S.phase, timer = $('#timer'), bar = $('#bar'), now = serverNow();
+  if (S.offsetReady) checkHost(now);
+  const timed = !!(S.room && me() && ph && (ph.state === 'play' || ph.state === 'vote') && typeof ph.startedAt === 'number' && ph.duration);
+  timer.hidden = bar.hidden = !timed;
+  if (!timed || !S.offsetReady) return;
+  const left = (deadline() - now) / 1000, sec = Math.max(0, Math.ceil(left));
   timer.textContent = sec;
   timer.classList.toggle('danger', sec <= 5);
   bar.classList.toggle('danger', sec <= 5);
   bar.firstElementChild.style.width = clamp(left / ph.duration * 100, 0, 100) + '%';
 
-  const beepKey = ph.round + ':' + ph.duration;
+  const beepKey = ph.state + ':' + ph.round + ':' + ph.duration;
   if (sec <= 5 && sec > 0 && S.beeped !== beepKey) { S.beeped = beepKey; beep(); }
 
-  // час вийшов — здаємо те, що є
-  if (left <= 0 && curKey === 'play:' + ph.round + ':work') submit(true);
-
-  // фази перемикає лише ведучий
-  if (isHost() && S.connected && !hostBusy) {
-    const ord = order();
-    const allIn = now - ph.startedAt > 1500 && ord.some(isDone) && ord.every(id => isDone(id) || isGone(id));
-    if (allIn || now >= deadline() + GRACE_MS) hostAdvance();
+  const hostCan = isHost() && S.connected && !hostBusy;   // фази перемикає лише ведучий
+  if (ph.state === 'play') {
+    // час вийшов — здаємо те, що є
+    if (left <= 0 && curKey === 'play:' + ph.round + ':work') submit(true);
+    if (hostCan) {
+      const ord = order();
+      const allIn = now - ph.startedAt > 1500 && ord.some(isDone) && ord.every(id => isDone(id) || isGone(id));
+      if (allIn || now >= deadline() + GRACE_MS) hostAdvance();
+    }
+  } else if (hostCan) {
+    const ids = onlineIds();
+    const allIn = now - ph.startedAt > 1500 && ids.length > 0 && ids.every(id => S.votes[id] != null);
+    if (allIn || now >= deadline() + 1000) finishVote();
   }
 }
 
@@ -678,8 +760,80 @@ async function newGame(atEnd) {
   if (!atEnd && !confirm(T.newGameConfirm)) return;
   try {
     await refs.phase.set({ state: 'lobby' });
-    await refs.chains.remove();
+    await clearGameData();
   } catch (e) { console.error(e); toast(T.errGeneric); }
+}
+
+/* ---------- реакції, зірочки, голосування ---------- */
+function fly(emoji) {
+  const layer = $('#fly');
+  if (layer.childElementCount > 70) return;
+  const el = h('span', { class: 'flyer', style: { left: (4 + Math.random() * 88) + '%', fontSize: (34 + Math.random() * 30) + 'px',
+    animationDuration: (1.5 + Math.random() * 0.8) + 's' } }, emoji);
+  layer.append(el);
+  setTimeout(() => el.remove(), 2500);
+}
+function sendReaction(emoji) {
+  const now = Date.now();
+  if (now - S.reactAt < 200) return;
+  S.reactAt = now;
+  // один запис на гравця, який перезаписується, — у базі нічого не накопичується
+  refs.reactions.child(S.uid).set({ e: emoji, t: serverNow() }).catch(() => {});
+}
+function onReaction(snap) {
+  const v = snap.val();
+  if (!v || !REACTIONS.includes(v.e) || S.lastReact[snap.key] === v.t) return;
+  S.lastReact[snap.key] = v.t;
+  if (Math.abs(serverNow() - v.t) < 6000) fly(v.e);
+}
+const reactBar = () => h('div', { class: 'reacts' }, REACTIONS.map(e => h('button', { type: 'button', class: 'tb rx', onclick: () => sendReaction(e) }, e)));
+
+function toggleStar(key, btn) {
+  const ref = refs.stars.child(key + '/' + S.uid), on = !S.myStars.has(key);
+  if (on) { S.myStars.add(key); ref.set(true).catch(() => {}); fly('⭐'); }
+  else { S.myStars.delete(key); ref.remove().catch(() => {}); }
+  btn.classList.toggle('on', on);
+}
+
+async function startVote() {
+  try {
+    await refs.votes.remove();
+    await refs.phase.update({ state: 'vote', startedAt: TS, duration: VOTE_SEC, results: null });
+  } catch (e) { console.error(e); toast(T.errGeneric); }
+}
+
+async function finishVote() {
+  if (hostBusy || !S.phase || S.phase.state !== 'vote') return;
+  hostBusy = true;
+  try {
+    const ord = order(), counts = {};
+    for (const id in S.votes) {
+      const c = S.votes[id];
+      if (Number.isInteger(c) && c >= 0 && c < ord.length && ord[c] !== id) counts[c] = (counts[c] || 0) + 1;
+    }
+    const top = Object.keys(counts).map(c => ({ c: +c, v: counts[c] })).sort((a, b) => b.v - a.v || a.c - b.c).slice(0, 3);
+    let best = null;
+    const stars = (await refs.stars.once('value')).val() || {};
+    for (const k in stars) {
+      const m = /^(\d+)_(\d+)$/.exec(k), v = Object.keys(stars[k] || {}).length;
+      if (m && v && (!best || v > best.v)) best = { c: +m[1], s: +m[2], v };
+    }
+    await refs.phase.update({ state: 'results', results: { top, best, voters: Object.keys(S.votes).length } });
+  } catch (e) { console.error(e); toast(T.errGeneric); }
+  finally { hostBusy = false; }
+}
+
+// перші кроки ланцюжків — для карток голосування й підсумків (без завантаження малюнків)
+function loadTitles() {
+  for (let c = 0; c < order().length; c++) {
+    if (S.titles[c] !== undefined) continue;
+    const cached = S.album.cache[c];
+    if (cached) { S.titles[c] = cached[0] || { s: true, n: '—' }; continue; }
+    S.titles[c] = null;
+    refs.chains.child(c + '/steps/0').once('value')
+      .then(s => { S.titles[c] = s.val() || { s: true, n: '—' }; render(); })
+      .catch(() => { delete S.titles[c]; });
+  }
 }
 
 function onKey(e) {
@@ -691,61 +845,165 @@ function onKey(e) {
 /* =====================================================================
    10. МАЛЮВАЛКА
    ===================================================================== */
+/* --- компактний запис штрихів: тип + колір + товщина + точки (по 4 символи на точку) --- */
+const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+const encPt = (x, y) => { const n = (clamp(Math.round(x), 0, 1023) << 10) | clamp(Math.round(y), 0, 1023); return B64[n >> 18 & 63] + B64[n >> 12 & 63] + B64[n >> 6 & 63] + B64[n & 63]; };
+const encW = w => String(clamp(Math.round(w), 1, 99)).padStart(2, '0');
+function parseOps(str) {
+  const out = [];
+  for (const o of String(str).split(';')) {
+    const t = o[0];
+    if (t === 'c') { out.push({ t }); continue; }
+    if (!t || !'sflre'.includes(t) || !/^[0-9a-fA-F]{6}$/.test(o.slice(1, 7))) continue;
+    const pts = [], body = o.slice(9);
+    for (let i = 0; i + 3 < body.length; i += 4) {
+      let n = 0, bad = false;
+      for (let j = 0; j < 4; j++) { const k = B64.indexOf(body[i + j]); if (k < 0) bad = true; n = n << 6 | k; }
+      if (bad) break;
+      pts.push(n >> 10, n & 1023);
+    }
+    if (pts.length < (t === 's' || t === 'f' ? 2 : 4)) continue;
+    out.push({ t, c: '#' + o.slice(1, 7), w: parseInt(o.slice(7, 9), 10) || 1, pts });
+  }
+  return out;
+}
+function drawShape(ctx, t, color, w, x0, y0, x1, y1) {
+  ctx.strokeStyle = color; ctx.lineWidth = w; ctx.beginPath();
+  if (t === 'l') { ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); }
+  else if (t === 'r') ctx.rect(Math.min(x0, x1), Math.min(y0, y1), Math.abs(x1 - x0), Math.abs(y1 - y0));
+  else ctx.ellipse((x0 + x1) / 2, (y0 + y1) / 2, Math.abs(x1 - x0) / 2, Math.abs(y1 - y0) / 2, 0, 0, Math.PI * 2);
+  ctx.stroke();
+}
+// програє запис на полотні 800×600 і викликає onEnd
+function playReplay(cv, str, onEnd) {
+  const ops = parseOps(str), ctx = cv.getContext('2d', { willReadFrequently: true }), W = cv.width, H = cv.height;
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.lineCap = ctx.lineJoin = 'round';
+  const STEP = 14, cost = o => o.t === 's' ? o.pts.length / 2 : STEP;
+  const total = ops.reduce((a, o) => a + cost(o), 0), dur = clamp(total * 5, 1200, 4500);
+  let i = 0, j = 0, done = 0, t0 = null;
+  function frame(ts) {
+    if (!cv.isConnected) return;
+    if (t0 === null) t0 = ts;
+    const target = total * Math.min(1, (ts - t0) / dur);
+    while (i < ops.length && done < target) {
+      const o = ops[i];
+      if (o.t === 's') {
+        const n = o.pts.length / 2;
+        ctx.strokeStyle = ctx.fillStyle = o.c; ctx.lineWidth = o.w;
+        if (j === 0) { ctx.beginPath(); ctx.arc(o.pts[0], o.pts[1], o.w / 2, 0, Math.PI * 2); ctx.fill(); j = 1; done++; }
+        while (j < n && done < target) {
+          ctx.beginPath(); ctx.moveTo(o.pts[j * 2 - 2], o.pts[j * 2 - 1]); ctx.lineTo(o.pts[j * 2], o.pts[j * 2 + 1]); ctx.stroke();
+          j++; done++;
+        }
+        if (j >= n) { i++; j = 0; }
+      } else {
+        if (o.t === 'c') { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); }
+        else if (o.t === 'f') floodFill(ctx, clamp(o.pts[0], 0, W - 1), clamp(o.pts[1], 0, H - 1), o.c);
+        else drawShape(ctx, o.t, o.c, o.w, o.pts[0], o.pts[1], o.pts[2], o.pts[3]);
+        i++; done += STEP;
+      }
+    }
+    if (i < ops.length) requestAnimationFrame(frame); else setTimeout(onEnd, 400);
+  }
+  requestAnimationFrame(frame);
+}
+
 function createPad(onChange) {
-  const W = 800, H = 600, UNDO_MAX = 20;
+  const W = 800, H = 600, UNDO_MAX = 20, SHAPES = { line: 'l', rect: 'r', ellipse: 'e' };
   const cv = h('canvas', { width: W, height: H });
   const ctx = cv.getContext('2d', { willReadFrequently: true });
-  const st = { tool: 'brush', color: PALETTE[0], size: BRUSHES[1], undo: [] };
+  const st = { tool: 'brush', color: PALETTE[0], size: BRUSHES[1], undo: [], redo: [] };
+  let ops = [], replayOk = true;      // ops — дії, з яких складається поточний малюнок (для анімації в альбомі)
   ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
   ctx.lineCap = ctx.lineJoin = 'round';
 
-  const snap = () => { st.undo.push(ctx.getImageData(0, 0, W, H)); if (st.undo.length > UNDO_MAX) st.undo.shift(); };
+  const grab = () => ctx.getImageData(0, 0, W, H);
+  const snap = () => { st.undo.push(grab()); if (st.undo.length > UNDO_MAX) st.undo.shift(); st.redo = []; };
   // координати вказівника → координати полотна, хоч би якого розміру воно було на екрані
   const pos = e => { const b = cv.getBoundingClientRect(); return [(e.clientX - b.left) * W / b.width, (e.clientY - b.top) * H / b.height]; };
-  let active = null, last = null;
+  let active = null, start = null, last = null, cur = null, rec = '', recLast = null, base = null;
 
   cv.addEventListener('pointerdown', e => {
     if (e.button > 0 || active !== null) return;
     e.preventDefault();
-    const [x, y] = pos(e);
+    const [x, y] = pos(e), px = clamp(Math.round(x), 0, W - 1), py = clamp(Math.round(y), 0, H - 1);
+    if (st.tool === 'pick') {
+      const d = ctx.getImageData(px, py, 1, 1).data;
+      st.color = '#' + [d[0], d[1], d[2]].map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+      st.tool = 'brush'; paint(); return;
+    }
     snap();
-    if (st.tool === 'fill') { floodFill(ctx, clamp(Math.floor(x), 0, W - 1), clamp(Math.floor(y), 0, H - 1), st.color); onChange(); return; }
-    active = e.pointerId; last = [x, y];
+    if (st.tool === 'fill') { floodFill(ctx, px, py, st.color); ops.push('f' + st.color.slice(1) + '00' + encPt(px, py)); onChange(); return; }
+    active = e.pointerId; start = last = [x, y];
     try { cv.setPointerCapture(e.pointerId); } catch (err) {}
-    ctx.strokeStyle = ctx.fillStyle = st.tool === 'eraser' ? '#FFFFFF' : st.color;
-    ctx.lineWidth = st.tool === 'eraser' ? st.size * 1.8 : st.size;
-    ctx.beginPath(); ctx.arc(x, y, ctx.lineWidth / 2, 0, Math.PI * 2); ctx.fill();
+    cur = { shape: SHAPES[st.tool], c: st.tool === 'eraser' ? '#FFFFFF' : st.color, w: Math.round(st.tool === 'eraser' ? st.size * 1.8 : st.size) };
+    if (cur.shape) { base = st.undo[st.undo.length - 1]; return; }
+    ctx.strokeStyle = ctx.fillStyle = cur.c; ctx.lineWidth = cur.w;
+    ctx.beginPath(); ctx.arc(x, y, cur.w / 2, 0, Math.PI * 2); ctx.fill();
+    rec = encPt(x, y); recLast = [x, y];
   });
   cv.addEventListener('pointermove', e => {
     if (e.pointerId !== active) return;
     e.preventDefault();
+    if (cur.shape) {                                   // фігура: щоразу перемальовуємо попередній перегляд
+      last = pos(e);
+      ctx.putImageData(base, 0, 0);
+      drawShape(ctx, cur.shape, cur.c, cur.w, start[0], start[1], last[0], last[1]);
+      return;
+    }
     const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [];
     for (const ev of (evs.length ? evs : [e])) {
       const [x, y] = pos(ev);
       ctx.beginPath(); ctx.moveTo(last[0], last[1]); ctx.lineTo(x, y); ctx.stroke();
       last = [x, y];
+      if (Math.hypot(x - recLast[0], y - recLast[1]) >= 2) { rec += encPt(x, y); recLast = last; }
     }
   });
-  const end = e => { if (e.pointerId !== active) return; active = null; onChange(); };
+  const end = e => {
+    if (e.pointerId !== active) return;
+    active = null;
+    const head = cur.c.slice(1) + encW(cur.w);
+    if (cur.shape) {
+      ctx.putImageData(base, 0, 0); base = null;
+      drawShape(ctx, cur.shape, cur.c, cur.w, start[0], start[1], last[0], last[1]);
+      ops.push(cur.shape + head + encPt(start[0], start[1]) + encPt(last[0], last[1]));
+    } else {
+      if (last !== recLast) rec += encPt(last[0], last[1]);
+      ops.push('s' + head + rec);
+    }
+    onChange();
+  };
   cv.addEventListener('pointerup', end);
   cv.addEventListener('pointercancel', end);
 
+  const undo = () => {
+    if (active !== null || !st.undo.length) return;
+    st.redo.push({ img: grab(), op: ops.pop() });
+    ctx.putImageData(st.undo.pop(), 0, 0); onChange();
+  };
+  const redo = () => {
+    if (active !== null || !st.redo.length) return;
+    const r = st.redo.pop();
+    st.undo.push(grab()); ctx.putImageData(r.img, 0, 0); ops.push(r.op); onChange();
+  };
+
   // --- панель інструментів ---
   const swatches = PALETTE.map(c => h('button', { type: 'button', class: 'sw', title: c, style: { background: c },
-    onclick: () => { st.color = c; if (st.tool === 'eraser') st.tool = 'brush'; paint(); } }));
+    onclick: () => { st.color = c; if (st.tool === 'eraser' || st.tool === 'pick') st.tool = 'brush'; paint(); } }));
   const sizes = BRUSHES.map(s => h('button', { type: 'button', class: 'tb', title: s + ' px',
     onclick: () => { st.size = s; paint(); } }, h('i', { style: { width: Math.max(5, s * 0.8) + 'px', height: Math.max(5, s * 0.8) + 'px' } })));
-  const toolBtn = (id, icon, fn) => h('button', { type: 'button', class: 'tb', title: T.tools[id], 'aria-label': T.tools[id], 'data-tool': id, onclick: fn }, icon);
+  const toolBtn = (id, icon, fn) => h('button', { type: 'button', class: 'tb', title: T.tools[id], 'aria-label': T.tools[id], 'data-tool': id,
+    onclick: fn || (() => { st.tool = id; paint(); }) }, icon);
   const toolBtns = [
-    toolBtn('brush', '✏️', () => { st.tool = 'brush'; paint(); }),
-    toolBtn('eraser', '🧽', () => { st.tool = 'eraser'; paint(); }),
-    toolBtn('fill', '🪣', () => { st.tool = 'fill'; paint(); }),
-    toolBtn('undo', '↩️', () => { if (st.undo.length) { ctx.putImageData(st.undo.pop(), 0, 0); onChange(); } }),
-    toolBtn('clear', '🗑️', () => { snap(); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); onChange(); })
+    toolBtn('brush', '✏️'), toolBtn('eraser', '🧽'), toolBtn('fill', '🪣'), toolBtn('pick', '💧'),
+    toolBtn('line', h('span', { class: 'ic line' })),
+    toolBtn('rect', h('span', { class: 'ic rect' })), toolBtn('ellipse', h('span', { class: 'ic ell' })),
+    toolBtn('undo', '↩️', undo), toolBtn('redo', '↪️', redo),
+    toolBtn('clear', '🗑️', () => { if (active !== null) return; snap(); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ops.push('c'); onChange(); })
   ];
   function paint() {
     swatches.forEach((b, i) => b.classList.toggle('on', PALETTE[i] === st.color && st.tool !== 'eraser'));
-    sizes.forEach((b, i) => b.classList.toggle('on', BRUSHES[i] === st.size));
+    sizes.forEach((b, i) => { b.classList.toggle('on', BRUSHES[i] === st.size); b.firstChild.style.background = st.color; });
     toolBtns.forEach(b => b.classList.toggle('on', b.dataset.tool === st.tool));
   }
   paint();
@@ -753,8 +1011,17 @@ function createPad(onChange) {
   return {
     canvas: cv,
     tools: [h('div', { class: 'pal' }, swatches), h('div', { class: 'trow' }, sizes), h('div', { class: 'trow five' }, toolBtns)],
-    load(url) { const im = new Image(); im.onload = () => ctx.drawImage(im, 0, 0, W, H); im.src = url; },
+    // відновлення чернетки після перезавантаження сторінки
+    load(url, opsStr) {
+      const im = new Image(); im.onload = () => ctx.drawImage(im, 0, 0, W, H); im.src = url;
+      if (typeof opsStr === 'string') ops = opsStr ? opsStr.split(';') : []; else replayOk = false;
+    },
     raw: () => cv.toDataURL('image/png'),
+    exportReplay(full) {
+      if (!replayOk) return full ? null : '';
+      const s = ops.filter(Boolean).join(';');
+      return full || s.length <= REPLAY_MAX_CHARS ? s : '';
+    },
     // стискаємо до ~640×480 WebP (або JPEG, якщо браузер не вміє WebP), ціль — до 50 КБ
     exportImage() {
       const out = document.createElement('canvas'), o = out.getContext('2d');
@@ -809,7 +1076,7 @@ function viewKey() {
   if (!me()) return 'join';
   const ph = S.phase;
   if (ph.state === 'play') return 'play:' + ph.round + ':' + (myIdx() < 0 ? 'watch' : isDone(S.uid) ? 'wait' : 'work');
-  if (ph.state === 'album') return 'album';
+  if (ph.state === 'album' || ph.state === 'vote' || ph.state === 'results') return ph.state;
   return 'lobby';
 }
 
@@ -827,11 +1094,15 @@ function render() {
     else if (a === 'lobby') mountLobby(root);
     else if (a === 'play') (mode === 'work' ? mountWork : mountWait)(root, mode);
     else if (a === 'album') mountAlbum(root);
+    else if (a === 'vote') mountVote(root);
+    else if (a === 'results') mountResults(root);
   }
   refreshHeader();
   if (key === 'lobby') refreshLobby();
   else if (key.startsWith('play')) refreshStatus();
   else if (key === 'album') refreshAlbum();
+  else if (key === 'vote') refreshVote();
+  else if (key === 'results') refreshResults();
 }
 
 function refreshHeader() {
@@ -844,7 +1115,7 @@ function refreshHeader() {
     const k = roundKind(ph.round);
     b.textContent = T.round(ph.round + 1, ph.rounds) + ' · ' + T.kind[k];
     b.className = 'badge ' + (k === 'draw' ? 'bbg' : 'gbg');
-  } else { b.textContent = T.albumTitle; b.className = 'badge'; }
+  } else { b.textContent = ph.state === 'vote' ? T.vote : ph.state === 'results' ? T.results : T.albumTitle; b.className = 'badge'; }
 }
 
 function mountMessage(root, title, text) {
@@ -909,6 +1180,7 @@ function mountProfile(root, joining) {
 function mountLobby(root) {
   clearDraft();
   S.album = { cache: {}, loading: null, key: null, shown: null };
+  S.titles = {}; S.myStars = new Set(); S.best = null;
   S.beeped = null; lobbyCtlKey = null;
   const link = location.origin + location.pathname + '?room=' + S.room;
   root.append(
@@ -978,7 +1250,7 @@ function mountWork(root) {
   let promptEl = null;
 
   if (kind === 'write') {
-    const ta = h('textarea', { class: 'inp area', maxLength: MAX_TEXT, placeholder: T.writePh, value: draft || '', 'aria-label': T.writeTitle,
+    const ta = h('textarea', { class: 'inp area', maxLength: MAX_TEXT, placeholder: T.writePh, value: typeof draft === 'string' ? draft : '', 'aria-label': T.writeTitle,
       oninput: () => setDraft(draftId, ta.value) });
     ta.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submit(false); } });
     work.text = () => ta.value;
@@ -991,8 +1263,10 @@ function mountWork(root) {
       strip));
   } else if (kind === 'draw') {
     let saveTimer;
-    const pad = createPad(() => { clearTimeout(saveTimer); saveTimer = setTimeout(() => { if (work && work.pad === pad) setDraft(draftId, pad.raw()); }, 600); });
-    if (okImg(draft)) pad.load(draft);
+    const pad = createPad(() => { clearTimeout(saveTimer); saveTimer = setTimeout(() => {
+      if (work && work.pad === pad) setDraft(draftId, { img: pad.raw(), ops: pad.exportReplay(true) });
+    }, 600); });
+    if (draft && okImg(draft.img)) pad.load(draft.img, draft.ops);
     work.pad = pad;
     promptEl = h('div', { class: 'ptext' }, T.loading);
     btn.style.width = '100%';
@@ -1003,7 +1277,7 @@ function mountWork(root) {
         h('div', { class: 'tools' }, pad.tools, btn)),
       strip));
   } else {
-    const inp = h('input', { class: 'inp', maxLength: MAX_TEXT, placeholder: T.describePh, value: draft || '', autocomplete: 'off', 'aria-label': T.describeTitle,
+    const inp = h('input', { class: 'inp', maxLength: MAX_TEXT, placeholder: T.describePh, value: typeof draft === 'string' ? draft : '', autocomplete: 'off', 'aria-label': T.describeTitle,
       oninput: () => setDraft(draftId, inp.value) });
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(false); });
     work.text = () => inp.value;
@@ -1059,13 +1333,30 @@ function mountAlbum(root) {
     h('div', { class: 'alctl', id: 'alCtl' })));
 }
 
-function stepCard(st, i, pop) {
+function stepCard(st, i, pop, c) {
   st = st || { s: true, t: i % 2 ? 'draw' : 'text', n: '—' };
   const isImg = st.t === 'draw' && !st.s && okImg(st.v);
-  return h('div', { class: 'step' + (pop ? ' pop' : '') },
-    h('div', { class: 'who' }, avatarEl(S.players[st.a]), h('b', {}, st.n), h('span', {}, st.t === 'draw' ? T.drew : T.wrote)),
-    isImg ? h('img', { class: 'shot', src: st.v, alt: '' })
-          : h('div', { class: 'say ' + (st.t === 'draw' ? 'bbg' : i ? 'gbg' : 'ybg') + (i % 4 ? ' tilt-r' : ' tilt-l') }, st.s ? T.skipped : st.v));
+  const who = h('div', { class: 'who' }, avatarEl(S.players[st.a]), h('b', {}, st.n), h('span', {}, st.t === 'draw' ? T.drew : T.wrote), h('span', { class: 'grow' }));
+  if (!isImg) return h('div', { class: 'step' + (pop ? ' pop' : '') }, who,
+    h('div', { class: 'say ' + (st.t === 'draw' ? 'bbg' : i ? 'gbg' : 'ybg') + (i % 4 ? ' tilt-r' : ' tilt-l') }, st.s ? T.skipped : st.v));
+
+  const img = h('img', { class: 'shot', src: st.v, alt: '' }), box = h('div', {}, img);
+  const canReplay = typeof st.p === 'string' && st.p.length > 12;
+  const play = () => {                                  // анімація «як малювали», наприкінці — справжня картинка
+    if (box.firstChild !== img) return;
+    const cv = h('canvas', { class: 'shot', width: 800, height: 600 });
+    box.replaceChildren(cv);
+    playReplay(cv, st.p, () => { if (cv.isConnected) box.replaceChildren(img); });
+  };
+  if (canReplay) who.append(h('button', { type: 'button', class: 'btn sm w', title: T.replay, 'aria-label': T.replay, onclick: play }, '▶'));
+  if (st.a !== S.uid) {
+    const key = c + '_' + i;
+    const star = h('button', { type: 'button', class: 'btn sm w' + (S.myStars.has(key) ? ' on' : ''), title: T.star, 'aria-label': T.star,
+      onclick: () => toggleStar(key, star) }, '⭐');
+    who.append(star);
+  }
+  if (canReplay && pop) play();
+  return h('div', { class: 'step' + (pop ? ' pop' : '') }, who, box);
 }
 
 function refreshAlbum() {
@@ -1080,7 +1371,7 @@ function refreshAlbum() {
       render();
     }).catch(e => { console.error(e); if (A.loading === c) A.loading = null; });
   }
-  const key = [a.c, a.s, !!steps, host].join(':');
+  const key = [a.c, a.s, !!steps, host, !!ph.results].join(':');
   if (key === A.key) return;
   A.key = key;
   const list = $('#alList'), atEnd = a.c >= n - 1 && a.s >= R - 1, full = a.s >= R - 1;
@@ -1089,20 +1380,94 @@ function refreshAlbum() {
   if (!steps) list.replaceChildren(h('div', { class: 'center hint' }, T.loading));
   else {
     const fresh = !A.shown || A.shown.c !== a.c || a.s > A.shown.s;
-    list.replaceChildren(...Array.from({ length: a.s + 1 }, (_, i) => stepCard(steps[i], i, fresh && i === a.s)));
+    list.replaceChildren(...Array.from({ length: a.s + 1 }, (_, i) => stepCard(steps[i], i, fresh && i === a.s, a.c)));
     A.shown = { c: a.c, s: a.s };
     const lastEl = list.lastElementChild;
     if (a.s === 0) window.scrollTo(0, 0);
     else if (lastEl) lastEl.scrollIntoView({ block: 'center' });
   }
   const dl = h('button', { type: 'button', class: 'btn sm w', disabled: !full || !steps, onclick: () => downloadChain(a.c) }, T.download);
-  $('#alCtl').replaceChildren(...(host ? [
+  const voteBtn = ph.results
+    ? h('button', { type: 'button', class: 'btn ' + (atEnd ? 'big p' : 'sm w'), onclick: () => refs.phase.update({ state: 'results' }) }, T.resultsBtn)
+    : h('button', { type: 'button', class: 'btn ' + (atEnd ? 'big p' : 'sm w'), onclick: startVote }, T.vote);
+  $('#alCtl').replaceChildren(reactBar(), ...(host ? [
     h('button', { type: 'button', class: 'btn big w', disabled: a.c === 0 && a.s === 0, onclick: () => albumNav(-1) }, T.prev),
     h('button', { type: 'button', class: 'btn big', disabled: atEnd, onclick: () => albumNav(1) }, T.next),
+    voteBtn,
     h('button', { type: 'button', class: 'btn sm b', disabled: a.c >= n - 1, onclick: () => albumNav('chain') }, T.nextChain),
     dl,
-    h('button', { type: 'button', class: 'btn ' + (atEnd ? 'big p' : 'sm w'), onclick: () => newGame(atEnd) }, T.newGame)
+    h('button', { type: 'button', class: 'btn sm w', onclick: () => newGame(false) }, T.newGame)
   ] : [h('span', { class: 'hint', style: { fontWeight: 800 } }, T.hostFlips), dl]));
+}
+
+/* ---------- голосування ---------- */
+function mountVote(root) {
+  root.append(h('div', { class: 'stack', style: { alignItems: 'center' } },
+    h('div', { class: 'prompt ybg tilt-l center' }, h('h2', {}, T.voteTitle), h('div', { class: 'hint', style: { marginTop: '6px' } }, T.voteHint)),
+    h('div', { class: 'stcount', id: 'voteInfo' }),
+    h('div', { class: 'vgrid', id: 'voteGrid' }),
+    h('div', { id: 'voteCtl' })));
+}
+
+function refreshVote() {
+  loadTitles();
+  const ord = order(), mine = S.votes[S.uid];
+  $('#voteInfo').textContent = T.voted(Object.keys(S.votes).length, onlineIds().length);
+  $('#voteGrid').replaceChildren(...ord.map((id, c) => {
+    const t = S.titles[c], own = id === S.uid;
+    return h('button', { type: 'button', class: 'vcard' + (mine === c ? ' on' : ''), disabled: own,
+      onclick: () => refs.votes.child(S.uid).set(c).catch(() => toast(T.sendFail)) },
+      h('span', { class: 'vnum disp' }, '#' + (c + 1)),
+      h('span', { class: 'vname' }, t ? T.chainBy(t.n) + (own ? ' · ' + T.voteMine : '') : '…'),
+      h('span', { class: 'vtext' }, t ? (t.s ? T.skipped : t.v) : ''));
+  }));
+  $('#voteCtl').replaceChildren(...(isHost() ? [h('button', { type: 'button', class: 'btn p', onclick: finishVote }, T.showResults)] : []));
+}
+
+/* ---------- підсумки ---------- */
+function mountResults(root) {
+  S.resKey = null;
+  root.append(h('div', { class: 'album', id: 'resBox' }));
+  for (let i = 0; i < 14; i++) setTimeout(() => { if (curKey === 'results') fly(rand(['🎉', '🏆', '⭐'])); }, i * 120);
+}
+
+function refreshResults() {
+  loadTitles();
+  const ph = S.phase, res = ph.results || {}, top = toArr(res.top), best = res.best, host = isHost();
+  if (best) {
+    const bk = best.c + '_' + best.s;
+    if (!S.best || S.best.key !== bk) {
+      S.best = { key: bk, st: null };
+      refs.chains.child(best.c + '/steps/' + best.s).once('value')
+        .then(s => { if (S.best && S.best.key === bk) { S.best.st = s.val(); render(); } }).catch(() => {});
+    }
+  }
+  const bst = best && S.best && S.best.st;
+  const key = JSON.stringify([res, top.map(t => !!S.titles[t.c]), !!bst, host]);
+  if (key === S.resKey) return;
+  S.resKey = key;
+  const medals = ['🏆', '🥈', '🥉'];
+  $('#resBox').replaceChildren(...[
+    h('div', { class: 'alhead' }, h('h1', {}, T.results)),
+    !top.length && h('div', { class: 'say gbg center', style: { marginBottom: '26px' } }, T.noVotes),
+    ...top.map((t, i) => {
+      const ti = S.titles[t.c];
+      return h('div', { class: 'pod' + (i === 0 ? ' first tilt-l' : i === 1 ? ' tilt-r' : '') },
+        h('span', { class: 'medal' }, medals[i]),
+        h('div', { class: 'grow', style: { minWidth: '0' } },
+          h('div', { class: 'vname' }, '#' + (t.c + 1) + ' · ' + (ti ? T.chainBy(ti.n) : '…') + ' · ' + T.votesN(t.v)),
+          h('div', { class: 'vtext' }, ti ? (ti.s ? T.skipped : ti.v) : '')));
+    }),
+    bst && okImg(bst.v) && h('div', { class: 'step', style: { marginTop: '36px' } },
+      h('div', { class: 'who' }, h('b', {}, '🎨 ' + T.bestDrawing + ' — ' + bst.n), h('span', { class: 'grow' }), h('b', {}, '⭐ ' + best.v)),
+      h('img', { class: 'shot', src: bst.v, alt: '' })),
+    h('div', { class: 'alctl' }, reactBar(),
+      top.length > 0 && h('button', { type: 'button', class: 'btn sm w', onclick: () => downloadChain(top[0].c) }, T.downloadWinner),
+      host && top.length > 0 && h('button', { type: 'button', class: 'btn sm b',
+        onclick: () => refs.phase.update({ state: 'album', album: { c: top[0].c, s: ph.rounds - 1 } }) }, T.showWinner),
+      host && h('button', { type: 'button', class: 'btn sm w', onclick: () => refs.phase.update({ state: 'album' }) }, T.backToAlbum),
+      host && h('button', { type: 'button', class: 'btn big p', onclick: () => newGame(true) }, T.newGame))
+  ].filter(Boolean));
 }
 
 /* ---------- PNG ланцюжка з логотипом ---------- */
@@ -1134,7 +1499,14 @@ function wrapText(ctx, text, maxW) {
 const loadImg = src => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
 
 async function downloadChain(c) {
-  const steps = S.album.cache[c]; if (!steps) return;
+  let steps = S.album.cache[c];
+  if (!steps) {
+    try {
+      const snap = await refs.chains.child(c + '/steps').once('value');
+      steps = []; snap.forEach(ch => { steps[+ch.key] = ch.val(); });
+      S.album.cache[c] = steps;
+    } catch (e) { console.error(e); return toast(T.errGeneric); }
+  }
   const R = S.phase.rounds, W = 760, P = 40, IW = W - P * 2, LH = 34;
   const F_TEXT = '800 24px Manrope, sans-serif', F_LBL = '700 18px Manrope, sans-serif', F_TITLE = '900 34px Unbounded, "Arial Black", sans-serif';
   try { await Promise.all([F_TEXT, F_LBL, F_TITLE].map(f => document.fonts.load(f, 'Жж'))); } catch (e) {}
