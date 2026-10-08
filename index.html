@@ -232,6 +232,7 @@ const REACTIONS = ['😂', '🔥', '😱', '❤️', '👏', '🤯', '💩'];
 const T = {
   appName: 'WU Phone',
   tagline: 'Зіпсований телефон із малюнками',
+  otherGame: '🃏 Грати в Мемологію',
   setupTitle: 'Потрібно налаштувати Firebase',
   setupText: 'Відкрий index.html, знайди блок FIREBASE_CONFIG на початку скрипта і встав туди конфіг свого проєкту. Покрокова інструкція — у README.md.',
   loading: 'Завантаження…',
@@ -1151,7 +1152,11 @@ function render() {
     if (a === 'setup') mountMessage(root, T.setupTitle, T.setupText);
     else if (a === 'autherr') mountMessage(root, T.errAuthTitle, T.errAuth);
     else if (a === 'loading') mountMessage(root, T.loading, '');
-    else if (a === 'home') mountProfile(root, false);
+    else if (a === 'home') {
+      mountProfile(root, false);
+      root.append(h('div', { class: 'narrow center', style: { marginTop: '28px' } },
+        h('a', { class: 'btn b', href: 'mem.html', style: { display: 'inline-block', textDecoration: 'none' } }, T.otherGame)));
+    }
     else if (a === 'join') mountProfile(root, true);
     else if (a === 'lobby') mountLobby(root);
     else if (a === 'play') (mode === 'work' ? mountWork : mountWait)(root, mode);

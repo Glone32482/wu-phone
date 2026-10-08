@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<title>Мемологія · WU</title>
+<link rel="icon" id="favicon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Unbounded:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --y:#F4C93F; --k:#111; --bg:#FFF8E7; --p:#E0506E; --b:#7EC8E3; --g:#A8E06A;
+  --bd:3px solid var(--k); --sh:5px 5px 0 var(--k); --sh-s:3px 3px 0 var(--k);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--k)}
+/* фон сторінки: ледь помітні дудли; саме полотно для малювання лишається чисто білим */
+body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280' fill='none' stroke='%23111' stroke-opacity='.08' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 44q9-14 18 0t18 0 18 0'/%3E%3Ccircle cx='214' cy='46' r='14'/%3E%3Cpath d='M128 16l7 15 16 2-12 11 3 16-14-8-14 8 3-16-12-11 16-2z'/%3E%3Cpath d='M34 160h24M46 148v24'/%3E%3Cpath d='M158 122l15 26h-30z'/%3E%3Cpath d='M232 176l-20 20m0-20l20 20'/%3E%3Crect x='92' y='196' width='26' height='26' rx='3' transform='rotate%2812 105 209%29'/%3E%3Cpath d='M16 244l12-12 12 12 12-12 12 12'/%3E%3Cpath d='M176 240a13 13 0 0 0 26 0'/%3E%3Cpath d='M88 96l22-8-8 22z'/%3E%3Ccircle cx='252' cy='112' r='7' fill='%23F4C93F' fill-opacity='.55' stroke='none'/%3E%3Ccircle cx='70' cy='108' r='6' fill='%23E0506E' fill-opacity='.3' stroke='none'/%3E%3Ccircle cx='150' cy='212' r='6' fill='%237EC8E3' fill-opacity='.5' stroke='none'/%3E%3Ccircle cx='24' cy='98' r='5' fill='%23A8E06A' fill-opacity='.6' stroke='none'/%3E%3C/svg%3E");background-size:280px 280px}
+body{font:500 18px/1.4 Manrope,system-ui,sans-serif;min-height:100dvh;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+h1,h2,h3,.disp{font-family:Unbounded,"Arial Black",sans-serif;font-weight:900;line-height:1.1;margin:0}
+h1{font-size:clamp(34px,7vw,64px)} h2{font-size:clamp(22px,4vw,34px)} h3{font-size:18px}
+.grow{flex:1}
+.ybg{background:var(--y)!important}.bbg{background:var(--b)!important}.gbg{background:var(--g)!important}.pbg{background:var(--p)!important}
+.tilt-l{transform:rotate(-1.4deg)}.tilt-r{transform:rotate(1.2deg)}
+
+/* ---------- кнопки, картки, поля ---------- */
+.btn{font:900 17px/1.1 Unbounded,"Arial Black",sans-serif;padding:16px 22px;border:var(--bd);border-radius:12px;background:var(--y);color:var(--k);
+  box-shadow:var(--sh);cursor:pointer;transition:transform .08s,box-shadow .08s;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+@media(hover:hover){.btn:hover:not(:disabled){transform:translate(2px,2px);box-shadow:var(--sh-s)}}
+.btn:active:not(:disabled){transform:translate(4px,4px);box-shadow:1px 1px 0 var(--k)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.p{background:var(--p)}.btn.w{background:#fff}.btn.b{background:var(--b)}.btn.g{background:var(--g)}
+.btn.big{font-size:clamp(20px,3vw,26px);padding:20px 30px}
+.btn.sm{font-size:13px;padding:9px 12px;border-radius:10px;box-shadow:var(--sh-s)}
+@media(hover:hover){.btn.sm:hover:not(:disabled){transform:translate(1px,1px);box-shadow:2px 2px 0 var(--k)}}
+.btn.sm:active:not(:disabled){transform:translate(3px,3px);box-shadow:0 0 0 var(--k)}
+.card{background:#fff;border:var(--bd);box-shadow:var(--sh);border-radius:16px;padding:20px}
+.inp{font:700 20px/1.3 Manrope,system-ui,sans-serif;padding:14px 16px;border:var(--bd);border-radius:12px;background:#fff;color:var(--k);width:100%;outline:none}
+.inp:focus{box-shadow:var(--sh)}
+.inp.area{resize:none;font-size:24px;min-height:120px}
+.inp.num{width:110px;text-align:center}
+.lbl{font:800 13px/1.2 Manrope,sans-serif;text-transform:uppercase;letter-spacing:.06em}
+.hint{font-size:16px;opacity:.75}
+.row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.center{text-align:center}
+
+/* ---------- логотип ---------- */
+.logo{display:inline-block;width:44px;aspect-ratio:1;flex:none}
+.logo svg{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(3px 3px 0 #111)}
+.logo.lg{width:clamp(110px,22vw,160px)}
+.logo.lg svg{filter:drop-shadow(6px 6px 0 #111)}
+.wobble{animation:wobble 1.6s ease-in-out infinite alternate}
+@keyframes wobble{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+
+/* ---------- шапка ---------- */
+#hdr{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:8px 14px;background:var(--y);border-bottom:var(--bd)}
+#hdr .title{font-size:18px}
+.chip,.badge{font:800 14px/1 Manrope,sans-serif;padding:8px 10px;border:var(--bd);border-radius:10px;background:#fff;white-space:nowrap}
+.chip{letter-spacing:.12em}
+.timer{font:900 26px/1 Unbounded,sans-serif;min-width:78px;text-align:center;padding:8px 10px;border:var(--bd);border-radius:10px;background:#fff;box-shadow:var(--sh-s);font-variant-numeric:tabular-nums}
+.timer.danger{background:var(--p);animation:shake .3s steps(2) infinite}
+@keyframes shake{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
+#bar{position:sticky;top:0;height:10px;background:#fff;border-bottom:var(--bd);z-index:19}
+#bar i{display:block;height:100%;background:var(--k);width:100%}
+#bar.danger i{background:var(--p)}
+@media(max-width:560px){#hdr .title{display:none}#hdr{gap:8px;padding:6px 10px}.timer{font-size:22px;min-width:62px}.chip,.badge{font-size:12px;padding:7px 8px}#hdr .chip{display:none}}
+
+#app{max-width:1120px;margin:0 auto;padding:18px 16px 40px}
+.narrow{max-width:680px;margin:0 auto}
+.stack{display:flex;flex-direction:column;gap:18px}
+.hero{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;margin:14px 0 26px}
+.hero .tag{font:800 18px Manrope,sans-serif;background:#fff;border:var(--bd);border-radius:10px;padding:6px 12px;box-shadow:var(--sh-s)}
+
+/* ---------- аватари ---------- */
+.ava{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:var(--bd);border-radius:50%;background:#fff;font-size:21px;line-height:1;flex:none}
+.ava.xl{width:76px;height:76px;font-size:40px;box-shadow:var(--sh-s)}
+.ava{overflow:hidden}
+.ava svg{display:block;width:88%;height:88%}
+.pk svg{display:block;width:100%;height:100%;padding:3px}
+.pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:8px}
+.pk{aspect-ratio:1;font-size:24px;line-height:1;border:var(--bd);border-radius:10px;background:#fff;cursor:pointer;padding:0;transition:transform .08s}
+.pk.col{border-radius:50%}
+.pick.chars{grid-template-columns:repeat(auto-fill,minmax(62px,1fr))}
+.pk.on{box-shadow:var(--sh-s);transform:translate(-2px,-2px) scale(1.06);background:var(--y)}
+
+/* ---------- лобі ---------- */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start;margin-bottom:26px}
+@media(max-width:780px){.grid2{grid-template-columns:1fr}}
+.code{font-size:clamp(54px,12vw,96px);letter-spacing:.08em;margin:6px 0 10px}
+.link{font:700 15px/1.3 Manrope,sans-serif;word-break:break-all;background:#fff;border:var(--bd);border-radius:10px;padding:8px 10px;margin-bottom:14px}
+.plist{display:flex;flex-direction:column;gap:8px;margin-top:12px;max-height:420px;overflow:auto;padding:2px 6px 6px 2px}
+.pl{display:flex;align-items:center;gap:10px}
+.pl b{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl .tagm{font:700 12px Manrope,sans-serif;background:var(--y);border:2px solid var(--k);border-radius:8px;padding:2px 6px;white-space:nowrap}
+.pl.off{filter:grayscale(1);opacity:.45}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0;font-weight:700}
+.chk{width:30px;height:30px;accent-color:var(--k)}
+
+/* ---------- гра ---------- */
+.work{display:flex;flex-direction:column;gap:18px}
+.prompt{border:var(--bd);box-shadow:var(--sh);border-radius:14px;padding:14px 18px;background:#fff}
+.ptext{font:800 clamp(20px,3.2vw,30px)/1.25 Manrope,sans-serif;margin-top:4px;overflow-wrap:anywhere}
+.draw{display:grid;grid-template-columns:minmax(0,1fr) 216px;gap:22px;align-items:start}
+.padwrap{border:var(--bd);box-shadow:var(--sh);background:#fff;width:100%;max-width:max(280px,calc((100dvh - 270px)*4/3));margin:0 auto;line-height:0}
+.padwrap canvas,.padwrap img{display:block;width:100%;height:auto;aspect-ratio:4/3;background:#fff}
+.padwrap canvas{touch-action:none;cursor:crosshair}
+.padwrap.view{max-width:max(260px,calc((100dvh - 400px)*4/3))}
+.tools{display:flex;flex-direction:column;gap:14px}
+.pal{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.sw{aspect-ratio:1;border:var(--bd);border-radius:9px;cursor:pointer;padding:0}
+.sw.on{box-shadow:var(--sh-s);transform:translate(-2px,-2px) scale(1.08)}
+.trow{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.trow.five{grid-template-columns:repeat(5,1fr)}
+.tb{height:46px;border:var(--bd);border-radius:10px;background:#fff;cursor:pointer;font-size:20px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+.tb.on{background:var(--y);box-shadow:var(--sh-s);transform:translate(-2px,-2px)}
+.tb:active{transform:translate(2px,2px)}
+.tb i{display:block;background:var(--k);border-radius:50%}
+@media(max-width:820px){
+  .draw{grid-template-columns:1fr;gap:16px}
+  .pal{grid-template-columns:repeat(8,1fr)}
+  .padwrap{max-width:max(280px,calc((100dvh - 200px)*4/3))}
+}
+.stcount{font:800 14px Manrope,sans-serif;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.status{display:flex;flex-wrap:wrap;gap:10px}
+.st{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px}
+.st .mark{position:absolute;left:26px;top:-6px;width:22px;height:22px;border:2px solid var(--k);border-radius:50%;background:#fff;font:800 12px/18px Manrope,sans-serif;text-align:center}
+.st.ok .mark{background:var(--g)}
+.st.off .ava,.st.off .nm{filter:grayscale(1);opacity:.4}
+.status.big{gap:18px 14px;justify-content:center}
+.status.big .st{width:92px}
+.status.big .ava{width:60px;height:60px;font-size:32px}
+.status.big .mark{left:58px;width:28px;height:28px;font-size:15px;line-height:24px}
+.st .nm{font:700 13px/1.2 Manrope,sans-serif;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.waitbox{text-align:center;display:flex;flex-direction:column;gap:20px;align-items:center;margin-top:10px}
+
+/* ---------- альбом ---------- */
+.album{max-width:720px;margin:0 auto}
+.alhead{text-align:center;margin-bottom:22px}
+.alhead .sub{font-weight:800;margin-top:8px}
+.step{margin:0 0 26px}
+.who{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:17px}
+.who b{font-weight:800}
+.say{font:800 clamp(22px,3.6vw,32px)/1.25 Manrope,sans-serif;padding:18px 22px;border:var(--bd);box-shadow:var(--sh);border-radius:14px;overflow-wrap:anywhere}
+.shot{display:block;width:100%;aspect-ratio:4/3;border:var(--bd);box-shadow:var(--sh);background:#fff}
+.pop{animation:pop .16s cubic-bezier(.2,1.5,.5,1) both}
+@keyframes pop{from{opacity:0;transform:scale(.8) translateY(20px)}}
+.alctl{position:sticky;bottom:0;z-index:10;display:flex;flex-wrap:wrap;gap:12px 14px;justify-content:center;align-items:center;padding:14px 8px;background:var(--bg);border-top:var(--bd);margin-top:10px}
+
+.ic{display:block;box-sizing:border-box}
+.ic.line{width:24px;height:3px;background:var(--k);transform:rotate(-38deg)}
+.ic.rect{width:22px;height:16px;border:3px solid var(--k)}
+.ic.ell{width:24px;height:17px;border:3px solid var(--k);border-radius:50%}
+.tb i{box-shadow:0 0 0 2px var(--k)}
+.btn.on{background:var(--y)}
+.reacts{flex-basis:100%;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.rx{width:52px;height:46px;font-size:24px}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;width:100%}
+.vcard{display:flex;flex-direction:column;gap:6px;text-align:left;font:inherit;color:inherit;background:#fff;border:var(--bd);border-radius:14px;box-shadow:var(--sh);padding:14px 16px;cursor:pointer;transition:transform .08s,box-shadow .08s}
+.vcard:disabled{opacity:.45;cursor:not-allowed}
+.vcard.on{background:var(--y);transform:translate(-2px,-2px) rotate(-1.2deg);box-shadow:7px 7px 0 var(--k)}
+.vnum{font-size:22px}
+.vname{font:700 14px/1.3 Manrope,sans-serif}
+.vtext{font:800 20px/1.25 Manrope,sans-serif;overflow-wrap:anywhere}
+.pod{display:flex;gap:16px;align-items:center;background:#fff;border:var(--bd);border-radius:14px;box-shadow:var(--sh);padding:14px 18px;margin-bottom:22px}
+.pod .medal{font-size:44px;line-height:1}
+.pod.first{background:var(--y);padding:22px}
+.pod.first .medal{font-size:72px}
+.pod.first .vtext{font-size:clamp(22px,3.4vw,30px)}
+#fly{position:fixed;inset:0;pointer-events:none;z-index:40;overflow:hidden}
+.flyer{position:absolute;bottom:-70px;line-height:1;animation:flyup 1.8s ease-out forwards}
+@keyframes flyup{to{transform:translateY(-110vh) rotate(18deg);opacity:.25}}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,calc(100% + 40px));z-index:50;max-width:calc(100vw - 32px);font-weight:800;background:var(--k);color:#fff;border:3px solid #fff;border-radius:12px;padding:12px 18px;transition:transform .12s;text-align:center}
+#toast.on{transform:translate(-50%,0)}
+#offline{position:fixed;top:0;left:0;right:0;z-index:60;background:var(--p);border-bottom:var(--bd);text-align:center;font-weight:800;padding:8px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ================= Мемологія ================= */
+.tagm{font:700 12px Manrope,sans-serif;background:var(--y);border:2px solid var(--k);border-radius:8px;padding:2px 6px;white-space:nowrap}
+.mwrap{max-width:1100px;margin:0 auto}
+.seats{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 8px;position:relative;z-index:2}
+.seats.top{margin-bottom:-20px;align-items:flex-end}
+.seats.bottom{margin-top:-20px;align-items:flex-start}
+.seat{width:80px;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center}
+.seats.top .seat{flex-direction:column-reverse}
+.sava{position:relative}
+.sava .ava{width:54px;height:54px;box-shadow:var(--sh-s)}
+.seat.me .ava{outline:4px solid var(--p);outline-offset:2px}
+.seat.off{filter:grayscale(1);opacity:.45}
+.seat.think .ava{animation:think .7s ease-in-out infinite alternate}
+@keyframes think{to{transform:translateY(-5px)}}
+.seat .nm{font:800 12px/1.2 Manrope,sans-serif;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:#fff;border:2px solid var(--k);border-radius:6px;padding:1px 5px}
+.seat .pts{font:900 12px/1 Unbounded,sans-serif;background:var(--y);border:2px solid var(--k);border-radius:999px;padding:3px 9px}
+.seat .mini{position:absolute;right:-13px;bottom:-3px;width:22px;height:28px;background:var(--y);border:2px solid var(--k);border-radius:4px;transform:rotate(14deg);box-shadow:2px 2px 0 var(--k)}
+.seat .mark{position:absolute;right:-9px;top:-7px;width:22px;height:22px;border:2px solid var(--k);border-radius:50%;background:var(--g);font:800 12px/18px Manrope,sans-serif;text-align:center}
+.seat .plus{position:absolute;left:-16px;top:-9px;font:900 13px/1 Unbounded,sans-serif;background:var(--p);border:2px solid var(--k);border-radius:999px;padding:3px 7px}
+.dense .seat{width:60px}
+.dense .sava .ava{width:42px;height:42px}
+.dense .seat .nm{font-size:10px}
+.table{background:var(--g);border:var(--bd);border-radius:64px;box-shadow:var(--sh);padding:12px}
+.rail{border:3px dashed rgba(17,17,17,.4);border-radius:52px;padding:36px 22px 32px;display:flex;flex-direction:column;align-items:center;gap:16px;min-height:230px}
+.sit{background:var(--y);border:var(--bd);border-radius:14px;box-shadow:var(--sh);padding:16px 24px;font:800 clamp(20px,3vw,32px)/1.25 Manrope,sans-serif;text-align:center;max-width:840px;transform:rotate(-1.2deg);overflow-wrap:anywhere}
+.mnote{font-size:clamp(13px,1.6vw,17px);text-align:center;background:#fff;border:var(--bd);border-radius:10px;padding:8px 14px}
+.mcard{position:relative;background:#fff;border:var(--bd);border-radius:12px;box-shadow:var(--sh);overflow:hidden;aspect-ratio:1}
+.mcard img{display:block;width:100%;height:100%;object-fit:contain}
+.mcard.back{background:var(--y);display:flex;align-items:center;justify-content:center}
+.mcard.back .logo{width:60%}
+.mcard.back .logo svg{filter:none}
+.zoom{position:absolute;right:6px;bottom:6px;width:34px;height:34px;border:2px solid var(--k);border-radius:8px;background:#fff;cursor:pointer;font-size:16px;line-height:1;padding:0}
+.pile{display:flex;flex-wrap:wrap;justify-content:center;min-height:118px;padding:6px 30px}
+.pile .mcard{width:88px;margin:0 -16px 8px;transform:rotate(var(--r,0deg));animation:throw .24s cubic-bezier(.2,1.4,.5,1) both}
+@keyframes throw{from{opacity:0;transform:translateY(170px) rotate(0deg) scale(1.5)}}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:22px;width:100%}
+.tcell{animation:flip .26s both}
+@keyframes flip{from{transform:rotateY(90deg);opacity:0}}
+.tcell .who{margin:9px 0 0;font-size:15px;flex-wrap:wrap}
+.mcard.click{cursor:pointer;transition:transform .08s}
+.tcell.on .mcard{outline:7px solid var(--p);transform:translate(-3px,-3px)}
+.tcell.win .mcard{outline:7px solid var(--y)}
+.vb{position:absolute;left:8px;top:8px;font:900 20px/1 Unbounded,sans-serif;background:var(--y);border:var(--bd);border-radius:999px;padding:6px 12px;box-shadow:var(--sh-s)}
+/* рука «прилипає» до низу екрана, як у картярських іграх, — її видно без прокручування */
+#mHand{position:sticky;bottom:0;z-index:6;margin-top:14px;background:linear-gradient(rgba(255,248,231,0),var(--bg) 46%)}
+#mHand:empty{display:none}
+.handbar{display:flex;align-items:center;gap:14px;padding-top:26px;flex-wrap:wrap}
+.handbar .lbl{background:#fff;border:2px solid var(--k);border-radius:8px;padding:6px 10px}
+.mctl{display:flex;flex-wrap:wrap;gap:12px 14px;justify-content:center;align-items:center;padding:20px 8px 0}
+.hand{display:flex;justify-content:center;padding:34px 20px 10px}
+.hand .mcard{width:clamp(110px,min(14vw,24vh),170px);margin:0 -8px;cursor:pointer;transform:rotate(var(--rot,0deg)) translateY(var(--dy,0px));transition:transform .1s}
+@media(hover:hover){.hand .mcard:hover{transform:rotate(var(--rot,0deg)) translateY(calc(var(--dy,0px) - 14px));z-index:3}}
+.hand .mcard.sel{transform:translateY(-30px) scale(1.1);outline:7px solid var(--p);z-index:5}
+.hand.done .mcard{opacity:.5;cursor:default;pointer-events:none}
+#zoom{position:fixed;inset:0;z-index:70;background:rgba(17,17,17,.84);display:flex;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
+#zoom img{max-width:100%;max-height:100%;border:var(--bd);border-radius:12px;background:#fff}
+.rank{display:flex;align-items:center;gap:12px;background:#fff;border:var(--bd);border-radius:12px;padding:8px 14px;margin-bottom:10px;font-weight:800}
+.rank .n{font:900 16px Unbounded,sans-serif;width:34px}
+@media(max-width:760px){
+  #mHand{position:static;background:none}
+  .handbar{padding-top:14px}
+  .handbar .btn{width:100%}
+  .hand{justify-content:flex-start;overflow-x:auto;gap:10px;padding:16px 6px}
+  .hand .mcard,.hand .mcard:hover{flex:none;width:44vw;margin:0;transform:none}
+  .hand .mcard.sel{transform:translateY(-6px)}
+  .tgrid{grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:12px}
+  .table{border-radius:34px;padding:8px}
+  .rail{border-radius:26px;padding:30px 10px 22px}
+  .seat{width:62px}.sava .ava{width:44px;height:44px}
+}
+</style>
+</head>
+<body>
+<header id="hdr" hidden>
+  <span class="logo" id="hdrLogo"></span>
+  <span class="title disp">Мемологія</span>
+  <span class="chip" id="hdrRoom"></span>
+  <span class="badge" id="hdrPhase"></span>
+  <span class="grow"></span>
+  <span class="timer" id="timer" hidden></span>
+  <button class="btn sm w" id="mute" type="button"></button>
+</header>
+<div id="bar" hidden><i></i></div>
+<main id="app"></main>
+<div id="toast" role="status"></div>
+<div id="offline" hidden></div>
+<div id="fly" aria-hidden="true"></div>
+<div id="zoom" hidden></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+'use strict';
+/* =====================================================================
+   МЕМОЛОГІЯ — друга гра на тому самому сайті, що й WU Phone.
+   1. FIREBASE-КОНФІГ — той самий, що в index.html
+   ===================================================================== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAWBEHD0D6z6iDdZGVF63N66BqU36vMcIA",
+  authDomain: "glone-aa288.firebaseapp.com",
+  databaseURL: "https://glone-aa288-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "glone-aa288",
+  appId: "1:200602622314:web:32f920ec4dcde9afb52d13"
+};
+
+/* =====================================================================
+   2. НАЛАШТУВАННЯ ГРИ
+   ===================================================================== */
+const DB_ROOT = 'mem', DB_INDEX = 'memIndex';
+const DEFAULTS = { pickSec: 45, voteSec: 30, rounds: 8, hostPlays: true };
+const LIMITS   = { pickSec: [15, 300], voteSec: [10, 300], rounds: [1, 20] };   // ті самі межі — у database.rules.json
+const MAX_NAME = 20;
+const HAND = 6;                  // скільки мемів на руці
+const SCORE_SEC = 15;            // скільки показуємо підсумок раунду, якщо ведучий не тисне «Далі»
+const GRACE_MS = 2500, GONE_MS = 8000, HOST_GONE_MS = 12000, DAY_MS = 24 * 60 * 60 * 1000;
+const MEME_COUNT = 71;           // картинки лежать у теці memes/: 01.jpg, 02.jpg, …
+const REACTIONS = ['😂', '🔥', '😱', '❤️', '👏', '🤯', '💩'];
+
+/* =====================================================================
+   3. УСІ ТЕКСТИ ІНТЕРФЕЙСУ
+   ===================================================================== */
+const T = {
+  appName: 'Мемологія',
+  tagline: 'Підбери найкращий мем до ситуації',
+  otherGame: '✏️ Грати у WU Phone',
+  setupTitle: 'Потрібно налаштувати Firebase',
+  setupText: 'Відкрий mem.html, знайди блок FIREBASE_CONFIG на початку скрипта і встав туди конфіг свого проєкту. Покрокова інструкція — у README.md.',
+  loading: 'Завантаження…',
+  yourName: 'Твоє ім’я',
+  namePh: 'Наприклад, Оля з дизайну',
+  pickAvatar: 'Обери персонажа',
+  randomChar: 'Випадковий персонаж',
+  pickColor: 'і колір',
+  createRoom: 'Створити стіл',
+  join: 'Сісти за стіл',
+  orJoin: 'або введи код столу',
+  codePh: 'КОД',
+  enter: 'Увійти',
+  roomLabel: code => `Стіл ${code}`,
+  roomCode: 'Код столу',
+  copyLink: 'Скопіювати посилання',
+  copied: 'Посилання скопійовано!',
+  players: n => `Гравці (${n})`,
+  host: '👑 ведучий',
+  you: 'це ти',
+  kick: 'Вилучити гравця',
+  kickConfirm: name => `Вилучити гравця «${name}»?`,
+  kicked: 'Ведучий вилучив тебе з-за столу',
+  settings: 'Налаштування',
+  pickSec: 'Час на вибір мему, с',
+  voteSec: 'Час на голосування, с',
+  rounds: 'Кількість раундів',
+  hostPlays: 'Ведучий теж грає',
+  lobbyInfo: (players, rounds) => `Гравців: ${players} · раундів: ${rounds}`,
+  settingsInfo: s => `🃏 ${s.pickSec} с · 🗳 ${s.voteSec} с · раундів: ${s.rounds}`,
+  start: 'Роздати карти',
+  needPlayers: 'Потрібно щонайменше 2 гравці',
+  waitHost: 'Чекаємо, поки ведучий роздасть карти…',
+  round: (r, n) => `Раунд ${r}/${n}`,
+  phase: { pick: 'Обирай мем', vote: 'Голосуй', score: 'Підсумок' },
+  notePick: (a, b) => `На столі мемів: ${a} з ${b}`,
+  noteVote: (a, b) => `Обери найвлучніший мем · проголосували ${a}/${b}`,
+  noteWin: names => `👑 Раунд забирає ${names}`,
+  noteNoWin: 'Ніхто не отримав голосів 🤷',
+  noCards: 'Цього разу на стіл ніхто нічого не кинув',
+  yourHand: 'Твої меми — обери один',
+  played: 'Твій мем на столі! Чекаємо на інших…',
+  throwBtn: 'Кинути на стіл',
+  yourMeme: 'твій мем',
+  spectator: 'Ти глядач: карти роздадуть у наступній грі, а голосувати можна вже зараз.',
+  zoom: 'Збільшити',
+  endPick: 'Відкрити карти зараз',
+  showScore: 'Показати підсумок',
+  nextRound: 'Наступний раунд ▶',
+  toFinal: 'До фіналу 🏆',
+  endGame: 'Завершити гру',
+  endConfirm: 'Завершити гру й повернутися в лобі?',
+  finalTitle: 'Фінал',
+  points: n => `${n} б.`,
+  newGame: 'Нова гра',
+  sendFail: 'Не вдалося надіслати. Перевір інтернет.',
+  soundOn: 'Звук увімкнено — натисни, щоб вимкнути',
+  soundOff: 'Звук вимкнено — натисни, щоб увімкнути',
+  youHost: 'Тепер ти ведучий 👑',
+  newHost: name => `Новий ведучий — ${name}`,
+  errName: 'Введи ім’я',
+  errCode: 'Код столу — це 4 латинські літери',
+  errNoRoom: 'Стіл не знайдено. Перевір код або створи новий.',
+  errCreate: 'Не вдалося створити стіл. Перевір, чи опубліковано актуальні правила бази (README.md).',
+  errAuthTitle: 'Не вдалося підключитися',
+  errAuth: 'Перевір Firebase-конфіг і чи ввімкнено анонімний вхід (Authentication → Sign-in method → Anonymous).',
+  errGeneric: 'Щось пішло не так. Онови сторінку.',
+  offline: 'Немає з’єднання. Пробуємо підключитися…'
+};
+
+/* =====================================================================
+   4. БАНК СИТУАЦІЙ — редагуй як завгодно (по одній у рядку)
+   ===================================================================== */
+const SITUATIONS = [
+  'Коли в п’ятницю о 17:55 прилітає «термінова задачка на п’ять хвилин»',
+  'Коли кажеш «у мене все працює», а на продакшені пожежа',
+  'Коли на дзвінку питають «є запитання?», і всі мовчать',
+  'Коли пів години говорив на дзвінку з вимкненим мікрофоном',
+  'Коли клієнт каже «зробіть як було, але краще»',
+  'Коли менеджер пише «є хвилинка?»',
+  'Коли зарплата прийшла на день раніше',
+  'Коли зарплата прийшла, а за годину її вже нема',
+  'Коли колега каже «у мене одне маленьке питання» і сідає поруч',
+  'Коли тебе додали в чат на 200 людей без пояснень',
+  'Коли відпустка починається завтра',
+  'Коли перший день після відпустки і 847 непрочитаних',
+  'Коли забув пароль одразу після того, як його змінив',
+  'Коли дедлайн був учора, а ти дізнався сьогодні',
+  'Коли нарада могла бути листом',
+  'Коли на нараді назвали твоє ім’я, а ти не слухав',
+  'Коли шеф зайшов саме тоді, коли ти відкрив меми',
+  'Коли задачу оцінили у дві години, а йде третій тиждень',
+  'Коли хтось доїв твій обід з офісного холодильника',
+  'Коли кавоварка зламалася в понеділок зранку',
+  'Коли колега пішов у відпустку і залишив тобі «пару дрібниць»',
+  'Коли тебе хвалять за роботу, яку зробив інший',
+  'Коли за твою роботу хвалять іншого',
+  'Коли «швидкий дзвінок на 15 хвилин» триває другу годину',
+  'Коли стажер за день зробив те, що ти не міг тиждень',
+  'Коли кажуть «у нас дружня команда, як сім’я»',
+  'Коли на корпоративі обіцяли «трохи посидимо»',
+  'Коли випадково відповів «усім» на розсилку для всієї компанії',
+  'Коли написав повідомлення не в той чат',
+  'Коли HR каже «у нас для тебе чудова новина»',
+  'Коли обіцяли премію, а дали грамоту',
+  'Коли пояснюєш бабусі, ким ти працюєш',
+  'Коли на співбесіді питають «ким ви бачите себе через п’ять років?»',
+  'Коли написав у резюме «впевнений користувач Excel», а тебе попросили зробити зведену таблицю',
+  'Коли інтернет зник за хвилину до важливої презентації',
+  'Коли вмикаєш демонстрацію екрана і згадуєш, які вкладки відкриті',
+  'Коли задачу закрили без тебе, і все працює',
+  'Коли просиш підвищення, а тобі пропонують «більше відповідальності»',
+  'Коли вся команда чекає на тебе одного',
+  'Коли нарешті закрив задачу, яка висіла пів року',
+  'Коли код запрацював з першого разу',
+  'Коли виправив один баг і з’явилося п’ять нових',
+  'Коли бачиш свій код річної давнини',
+  'Коли знайшов у коді коментар «не чіпати, бо все впаде»',
+  'Коли тестувальник знайшов баг за хвилину до релізу',
+  'Коли реліз призначили на вечір п’ятниці',
+  'Коли випадково видалив базу на продакшені',
+  'Коли на рев’ю до твого коду 97 коментарів',
+  'Коли замовник просить «просто додати одну кнопку»',
+  'Коли дизайнер бачить, як розробник зверстав його макет',
+  'Коли розробник бачить новий макет дизайнера',
+  'Коли два розробники з’ясовують, чий це баг',
+  'Коли кажеш «це не баг, це фіча»',
+  'Коли оновив одну бібліотеку і зламалося все',
+  'Коли чотири години шукав помилку, а це була пропущена кома',
+  'Коли ШІ написав код краще за тебе',
+  'Коли ШІ впевнено відповів повну нісенітницю',
+  'Коли тобі кажуть «ти ж айтішник, полагодь принтер»',
+  'Коли сервер упав саме під час твоєї відпустки',
+  'Коли тести зелені, але ти знаєш, що вони нічого не перевіряють',
+  'Коли документації немає, а автор коду звільнився',
+  'Коли мердж-конфлікт на три тисячі рядків',
+  'Коли технічний борг нарешті прийшов по своє',
+  'Коли «тимчасове рішення» працює вже п’ятий рік',
+  'Коли клієнт пише «це терміново» і зникає на тиждень',
+  'Коли клієнт каже «у мене є племінник, він зробить дешевше»',
+  'Коли після фінальної версії прийшла «фінальна_2_точно_остання»',
+  'Коли тобі надіслали таблицю на 40 вкладок без пояснень',
+  'Коли просили «креативно», а вибрали найнудніший варіант',
+  'Коли бухгалтерія просить ще один документ',
+  'Коли рахунок оплатили вчасно',
+  'Коли питають «коли буде готово?», а ти й сам не знаєш',
+  'Коли презентацію треба було зробити на вчора',
+  'Коли формула в Excel нарешті запрацювала',
+  'Коли хтось відсортував спільну таблицю і все поплуталося',
+  'Коли ти єдиний, хто дочитав лист до кінця',
+  'Коли будильник задзвонив у понеділок',
+  'Коли прокинувся за п’ять хвилин до початку робочого дня',
+  'Коли кажеш «ще одна серія» о третій ночі',
+  'Коли обіцяв собі з понеділка бігати',
+  'Коли купив абонемент у спортзал і сходив один раз',
+  'Коли на розпродажі кажеш «я тільки подивлюся»',
+  'Коли кур’єр приїхав саме тоді, коли ти в душі',
+  'Коли посилка їде вже третій тиждень',
+  'Коли передав за проїзд у маршрутці і не дочекався решти',
+  'Коли відчиняєш холодильник утретє, а там нічого нового',
+  'Коли готував за рецептом, а вийшло як завжди',
+  'Коли сів на дієту, а колега приніс торт',
+  'Коли кіт о четвертій ранку вирішив побігати',
+  'Коли кіт дивиться, як ти працюєш',
+  'Коли собака щось з’їв на прогулянці і не зізнається',
+  'Коли мама питає «а ти шапку вдягнув?»',
+  'Коли бабуся каже «ти щось схуд»',
+  'Коли родичі питають «коли вже весілля?»',
+  'Коли друг каже «я вже виходжу», а сам ще в ліжку',
+  'Коли в чаті пишуть «треба якось зустрітися»',
+  'Коли компанія не може вибрати, де поїсти',
+  'Коли в ресторані приносять рахунок',
+  'Коли стоматолог каже «буде трішки неприємно»',
+  'Коли лікар питає «а спортом ви займаєтеся?»',
+  'Коли зайшов у кімнату й забув навіщо',
+  'Коли на телефоні 1%, а зарядки немає',
+  'Коли випадково лайкнув фото трирічної давнини',
+  'Коли надіслав голосове на сім хвилин',
+  'Коли тобі надіслали голосове на сім хвилин',
+  'Коли сусіди почали ремонт у суботу о восьмій ранку',
+  'Коли сам почав ремонт «на два тижні»',
+  'Коли зібрав меблі, а залишилися зайві деталі',
+  'Коли навігатор каже «ви прибули», а навколо поле',
+  'Коли на касі згадав, що забув гаманець',
+  'Коли побачив ціни на оренду квартир',
+  'Коли побачив платіжку за комуналку',
+  'Коли подав податкову декларацію вчасно',
+  'Коли порахував, скільки за місяць витратив на доставку їжі',
+  'Коли нарешті п’ятниця',
+  'Коли неділя, вечір',
+  'Коли випав перший сніг, а ти на літній гумі',
+  'Коли обіцяли +25, а надворі злива',
+  'Коли на морі весь тиждень дощ',
+  'Коли повернувся з відпустки більш втомленим, ніж поїхав',
+  'Коли валіза не прилетіла разом із тобою',
+  'Коли сусід у літаку зайняв твій підлокітник',
+  'Коли дитина всоте питає «чому?»',
+  'Коли дитина раптом затихла в сусідній кімнаті',
+  'Коли розповів анекдот, а ніхто не засміявся',
+  'Коли сміявся з жарту, якого не зрозумів',
+  'Коли побачив себе на фото з корпоративу',
+  'Коли сказав офіціантові «і вам смачного»',
+  'Коли помахав людині, яка махала не тобі',
+  'Коли пояснюєш батькам, як користуватися смартфоном',
+  'Коли батьки надіслали листівку у Viber о шостій ранку',
+  'Коли знайшов гроші в зимовій куртці',
+  'Коли виграв суперечку, загугливши',
+  'Коли програв суперечку, загугливши',
+  'Коли вирішив лягти раніше, а вже друга ночі',
+  'Коли їси «востаннє перед дієтою» вп’яте за тиждень',
+  'Коли зважився після свят',
+  'Коли намагаєшся виглядати зайнятим',
+  'Коли всі зрозуміли завдання, крім тебе',
+  'Коли ти єдиний зрозумів завдання',
+  'Коли тобі кажуть «нам треба поговорити»',
+  'Коли забув про день народження друга',
+  'Коли подарували те саме, що й торік',
+  'Коли колега вмикає камеру, а в нього ідеальний порядок',
+  'Коли вмикаєш камеру, а за спиною гора одягу',
+  'Коли кіт пройшовся по клавіатурі під час дзвінка',
+  'Коли питаєш «мене чутно?», і ніхто не відповідає',
+  'Коли план був ідеальний рівно до першого кроку',
+  'Коли все пішло за планом (уперше в житті)',
+  'Коли сказав «гірше вже не буде»',
+  'Коли за 10 хвилин до кінця робочого дня тобі дзвонять',
+  'Коли вирішив заощаджувати й одразу замовив піцу',
+  'Коли дізнався, скільки заробляє колега',
+  'Коли тебе попросили «коротко розповісти про себе»',
+  'Коли на тімбілдингу треба взятися за руки',
+  'Коли таємний Санта подарував шкарпетки',
+  'Коли зустрів колегу в неділю в супермаркеті',
+  'Коли колега каже «я це вже десь бачив», дивлячись на твою ідею',
+  'Коли тебе призначили відповідальним, поки ти був у відпустці'
+];
+
+/* =====================================================================
+   5. АВАТАРИ, ПАЛІТРА, ЛОГОТИП
+   ===================================================================== */
+// Персонажі збираються з частин: тіло, очі, рот, аксесуар. Код аватара — 'c' + чотири цифри, напр. 'c2413'.
+const CH = {
+  top: [20, 22, 18, 18, 16, 32, 34],   // де в кожного тіла маківка — щоб капелюх сидів на голові
+  body: [
+    '<circle cx="50" cy="56" r="36"/>',
+    '<rect x="16" y="22" width="68" height="66" rx="16"/>',
+    '<ellipse cx="50" cy="56" rx="30" ry="38"/>',
+    '<path d="M18 88V50a32 32 0 0 1 64 0V88l-10.7-9-10.6 9-10.7-9-10.7 9-10.6-9-10.7 9Z"/>',
+    '<path d="M50 16Q90 58 80 82Q50 96 20 82Q10 58 50 16Z"/>',
+    '<ellipse cx="50" cy="60" rx="40" ry="28"/>',
+    '<path d="M20 88V46L22 16L40 34H60L78 16L80 46V88Z"/>'
+  ],
+  eyes: [
+    '<g fill="#fff" stroke-width="4"><circle cx="37" cy="50" r="9"/><circle cx="63" cy="50" r="9"/></g><g fill="#111" stroke="none"><circle cx="39" cy="51" r="4"/><circle cx="65" cy="51" r="4"/></g>',
+    '<circle cx="50" cy="48" r="14" fill="#fff" stroke-width="4"/><circle cx="52" cy="50" r="6" fill="#111" stroke="none"/>',
+    '<g fill="#fff" stroke-width="4"><circle cx="36" cy="48" r="12"/><circle cx="65" cy="52" r="7"/></g><g fill="#111" stroke="none"><circle cx="32" cy="45" r="4"/><circle cx="67" cy="54" r="3"/></g>',
+    '<path d="M27 49q9 9 18 0M55 49q9 9 18 0" stroke-width="4"/>',
+    '<g fill="#111" stroke-width="3"><rect x="24" y="42" width="23" height="15" rx="5"/><rect x="53" y="42" width="23" height="15" rx="5"/><path d="M47 46h6"/></g><path d="M29 47l5-3M58 47l5-3" stroke="#fff" stroke-width="3"/>',
+    '<g fill="#fff" stroke-width="4"><circle cx="31" cy="52" r="7"/><circle cx="50" cy="44" r="7"/><circle cx="69" cy="52" r="7"/></g><g fill="#111" stroke="none"><circle cx="31" cy="53" r="3"/><circle cx="50" cy="45" r="3"/><circle cx="69" cy="53" r="3"/></g>',
+    '<path d="M30 44l12 12M42 44l-12 12M58 44l12 12M70 44l-12 12" stroke-width="4"/>',
+    '<g fill="#111" stroke="none"><ellipse cx="37" cy="50" rx="8" ry="11"/><ellipse cx="63" cy="50" rx="8" ry="11"/></g><g fill="#fff" stroke="none"><circle cx="40" cy="46" r="3.5"/><circle cx="66" cy="46" r="3.5"/></g>'
+  ],
+  mouth: [
+    '<path d="M38 68q12 12 24 0" stroke-width="4"/>',
+    '<path d="M33 66h34a17 15 0 0 1-34 0Z" fill="#111" stroke-width="3"/><rect x="41" y="67" width="18" height="6" fill="#fff" stroke="none"/>',
+    '<path d="M38 68q12 10 24 0" stroke-width="4"/><path d="M47 72q6 15 12-1Z" fill="#E0506E" stroke-width="3"/>',
+    '<path d="M35 70l6-5 6 6 6-6 6 6 6-4" stroke-width="4"/>',
+    '<ellipse cx="50" cy="72" rx="6" ry="8" fill="#111" stroke="none"/>',
+    '<path d="M36 68h28" stroke-width="4"/><path d="M40 68l3 9 3-9ZM54 68l3 9 3-9Z" fill="#fff" stroke-width="2.5"/>',
+    '<path d="M50 67q-9-9-21 1q11 8 21-1q10 9 21 1q-12-10-21-1Z" fill="#111" stroke-width="2"/>',
+    '<path d="M40 71h20" stroke-width="4"/>'
+  ],
+  back: {   // малюється за тілом
+    1: '<path d="M50 30V6" stroke-width="4"/><circle cx="50" cy="5" r="6" fill="#F4C93F" stroke-width="3.5"/>',
+    2: '<path d="M22 32L25 6L40 26ZM78 32L75 6L60 26Z" fill="#fff" stroke-width="4"/>',
+    6: '<path d="M50 28q-12-18-20-14M50 28q-1-20 5-24M50 28q12-16 20-10" stroke-width="5"/>'
+  },
+  front: {  // малюється поверх тіла
+    3: '<path d="M35 25L50-3L65 25Z" fill="#E0506E" stroke-width="4"/><circle cx="50" cy="-4" r="5" fill="#fff" stroke-width="3"/>',
+    4: '<rect x="35" y="0" width="30" height="20" fill="#111" stroke-width="3"/><rect x="26" y="19" width="48" height="7" rx="3" fill="#111" stroke-width="3"/>',
+    5: '<path d="M50 20L32 10V30ZM50 20L68 10V30Z" fill="#E0506E" stroke-width="4"/><circle cx="50" cy="20" r="5" fill="#E0506E" stroke-width="3.5"/>',
+    7: '<path d="M32 26V6l9 9 9-11 9 11 9-9V26Z" fill="#F4C93F" stroke-width="4"/>'
+  }
+};
+const isChar = v => /^c[0-6][0-7]{3}$/.test(v || '');
+function charSVG(code, color) {
+  const b = +code[1], a = +code[4], dy = CH.top[b] - 22;
+  return `<svg viewBox="-6 -14 112 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g fill="none" stroke="#111" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">` +
+    `<g transform="translate(0 ${dy})">${CH.back[a] || ''}</g><g fill="${okColor(color)}">${CH.body[b]}</g>${CH.eyes[+code[2]]}${CH.mouth[+code[3]]}` +
+    `<g transform="translate(0 ${dy})">${CH.front[a] || ''}</g></g></svg>`;
+}
+const randomChar = () => 'c' + Math.floor(Math.random() * 7) + Math.floor(Math.random() * 8) + Math.floor(Math.random() * 8) + Math.floor(Math.random() * 8);
+const CHARS = Array.from({ length: 23 }, (_, i) => 'c' + i % 7 + (i * 3) % 8 + (i * 5 + 1) % 8 + (i * 7 + 2) % 8);   // готові персонажі для вибору
+const AVATAR_COLORS = ['#F4C93F','#E0506E','#7EC8E3','#A8E06A','#FF9F5A','#B79CFF','#FFB3D1','#FFFFFF'];
+// палітра малювалки — навмисно не збігається з кольорами інтерфейсу
+const PALETTE = ['#000000','#6B6B6B','#C4C4C4','#FFFFFF','#E53935','#FF8A00','#FFE600','#2EAD4B',
+                 '#0B6B3A','#00B8B0','#1E88E5','#0D2C8A','#8E24AA','#FF6FB5','#8B5A2B','#F2C29B'];
+const BRUSHES = [4, 9, 18, 34];           // у пікселях полотна 800×600
+const CODE_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+const C = { y: '#F4C93F', k: '#111111', bg: '#FFF8E7', b: '#7EC8E3', g: '#A8E06A' };
+
+// Літери «WU» намальовані контурами, тож логотип однаковий у SVG, favicon і на PNG
+const LOGO_PATH = 'M14 36.5H23.5L26.04 47.5L30 36.5H38L41.96 47.5L44.5 36.5H54L47.75 63.5H38.25L34 49.6L29.75 63.5H20.25Z' +
+                  'M56 36.5H65.5V52.5a5.5 3 0 0 0 11 0V36.5H86V53a15 10.5 0 0 1-30 0Z';
+const LOGO_T = 'translate(50 50) scale(.92) translate(-50 -50)';
+const LOGO_SVG = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="WU"><circle cx="50" cy="50" r="48" fill="${C.y}" stroke="${C.k}" stroke-width="3" vector-effect="non-scaling-stroke"/><path transform="${LOGO_T}" d="${LOGO_PATH}" fill="${C.k}"/></svg>`;
+const FAVICON_SVG = `<svg viewBox="-4 -4 114 114" xmlns="http://www.w3.org/2000/svg"><circle cx="57" cy="57" r="48" fill="${C.k}"/><circle cx="50" cy="50" r="48" fill="${C.y}" stroke="${C.k}" stroke-width="6"/><path transform="${LOGO_T}" d="${LOGO_PATH}" fill="${C.k}"/></svg>`;
+
+/* =====================================================================
+   6. ДОПОМІЖНЕ
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const rand = a => a[Math.floor(Math.random() * a.length)];
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const okImg = v => typeof v === 'string' && /^data:image\/(webp|jpeg|png);base64,/.test(v);
+const okColor = v => /^#[0-9a-fA-F]{6}$/.test(v || '') ? v : '#FFFFFF';
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem('wuphone.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('wuphone.' + k, JSON.stringify(v)); } catch (e) {} }
+};
+
+function h(tag, props, ...kids) {
+  const el = document.createElement(tag);
+  for (const k in props || {}) {
+    const v = props[k];
+    if (v == null || v === false) continue;
+    if (k === 'class') el.className = v;
+    else if (k === 'style') Object.assign(el.style, v);
+    else if (k === 'html') el.innerHTML = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k in el) el[k] = v;
+    else el.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) {
+    if (c == null || c === false) continue;
+    el.append(c.nodeType ? c : document.createTextNode(c));
+  }
+  return el;
+}
+const logoEl = cls => h('span', { class: 'logo ' + (cls || ''), html: LOGO_SVG });
+// аватар: персонаж із частин; старі емодзі-аватари теж показуються
+const avatarEl = (p, cls) => p && isChar(p.avatar)
+  ? h('span', { class: 'ava ' + (cls || ''), html: charSVG(p.avatar, p.color) })
+  : h('span', { class: 'ava ' + (cls || ''), style: { background: okColor(p && p.color) } }, (p && p.avatar) || '👤');
+
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('on'), 2800);
+}
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); }
+  catch (e) {
+    const ta = h('textarea', { value: text }); document.body.append(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e2) {}
+    ta.remove();
+  }
+  toast(T.copied);
+}
+
+/* ---------- звук ---------- */
+let audioCtx = null;
+function unlockAudio() {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  } catch (e) {}
+}
+function beep() {
+  if (S.muted || !audioCtx) return;
+  try {
+    [880, 660].forEach((f, i) => {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain(), t = audioCtx.currentTime + i * 0.17;
+      o.type = 'square'; o.frequency.value = f; g.gain.value = 0.07;
+      o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t + 0.13);
+    });
+  } catch (e) {}
+}
+
+
+/* =====================================================================
+   7. СТАН
+   ===================================================================== */
+const S = {
+  boot: 'loading',          // setup | loading | autherr | ok
+  uid: null, room: null,
+  meta: null, players: {}, phase: null, loaded: {},
+  joined: false, connected: false, offset: 0, offsetReady: false,
+  muted: LS.get('muted', false), beeped: null,
+  plays: {}, votes: {}, stream: [],     // plays[раунд][гравець] = номер мему; stream — мої карти на всю гру
+  selected: null, pile: null, keys: {}, autoAt: 0,
+  claimAt: 0, reactAt: 0, lastReact: {}
+};
+let db, TS, refs = {}, curKey = null, hostBusy = false, lobbyCtlKey = null;
+
+const serverNow = () => Date.now() + S.offset;
+const me = () => S.players[S.uid];
+const isHost = () => !!S.meta && S.meta.hostId === S.uid;
+const settings = () => Object.assign({}, DEFAULTS, S.meta && S.meta.settings);
+const toArr = v => !v ? [] : Array.isArray(v) ? v : Object.values(v);
+const order = () => toArr(S.phase && S.phase.order);
+const inGame = () => order().includes(S.uid);
+const onlineIds = () => Object.keys(S.players).filter(id => S.players[id].online !== false);
+const isGone = id => { const p = S.players[id]; return !p || (p.online === false && serverNow() - (p.lastSeen || serverNow()) > GONE_MS); };
+const deadline = () => S.phase.startedAt + S.phase.duration * 1000;
+const playsOf = r => (S.plays && S.plays[r]) || {};
+const votesOf = r => (S.votes && S.votes[r]) || {};
+const okMeme = i => Number.isInteger(i) && i >= 0 && i < MEME_COUNT;
+const memeUrl = i => 'memes/' + String(i + 1).padStart(2, '0') + '.jpg';
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const eligible = () => { const st = settings(); return onlineIds().filter(id => st.hostPlays || id !== S.meta.hostId); };
+
+// рука = перші (HAND + раунд) карт мого потоку мінус уже зіграні
+function myHand() {
+  const used = new Set(), pl = S.plays || {};
+  for (const r in pl) { const v = pl[r] && pl[r][S.uid]; if (v != null) used.add(v); }
+  return S.stream.slice(0, HAND + S.phase.round).filter(i => okMeme(i) && !used.has(i));
+}
+// голоси раунду: скільки отримав кожен, хто кинув мем (за себе не рахується)
+function roundTally(r) {
+  const pl = playsOf(r), vt = votesOf(r), out = {};
+  for (const voter in vt) { const t = vt[voter]; if (t !== voter && pl[t] != null) out[t] = (out[t] || 0) + 1; }
+  return out;
+}
+// загальний рахунок = сума голосів за всі завершені раунди
+function scores() {
+  const ph = S.phase, out = {};
+  order().forEach(id => { out[id] = 0; });
+  const last = ph.state === 'score' || ph.state === 'final' ? ph.round : ph.round - 1;
+  for (let r = 0; r <= last; r++) { const t = roundTally(r); for (const id in t) out[id] = (out[id] || 0) + t[id]; }
+  return out;
+}
+
+/* =====================================================================
+   8. FIREBASE: СТОЛИ, ПРИСУТНІСТЬ
+   ===================================================================== */
+async function init() {
+  $('#favicon').href = 'data:image/svg+xml,' + encodeURIComponent(FAVICON_SVG);
+  $('#hdrLogo').innerHTML = LOGO_SVG;
+  $('#offline').textContent = T.offline;
+  $('#zoom').onclick = () => { $('#zoom').hidden = true; };
+  const mute = $('#mute');
+  const paintMute = () => { mute.textContent = S.muted ? '🔇' : '🔊'; mute.title = S.muted ? T.soundOff : T.soundOn; };
+  mute.onclick = () => { S.muted = !S.muted; LS.set('muted', S.muted); paintMute(); if (!S.muted) { unlockAudio(); beep(); } };
+  paintMute();
+  document.addEventListener('pointerdown', unlockAudio, { passive: true });
+
+  if (typeof firebase === 'undefined' || JSON.stringify(FIREBASE_CONFIG).includes('PASTE_')) { S.boot = 'setup'; return render(); }
+  render();
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    TS = firebase.database.ServerValue.TIMESTAMP;
+    const cred = await firebase.auth().signInAnonymously();
+    S.uid = cred.user.uid;
+    LS.set('playerId', S.uid);
+  } catch (e) { console.error(e); S.boot = 'autherr'; return render(); }
+
+  db.ref('.info/serverTimeOffset').on('value', s => { S.offset = s.val() || 0; S.offsetReady = true; });
+  let offTimer;
+  db.ref('.info/connected').on('value', s => {
+    S.connected = !!s.val();
+    clearTimeout(offTimer);
+    if (S.connected) { $('#offline').hidden = true; if (S.joined) presence(); }
+    else offTimer = setTimeout(() => { $('#offline').hidden = false; }, 3000);
+  });
+
+  const code = (new URLSearchParams(location.search).get('room') || '').toUpperCase();
+  if (code) {
+    let exists = false;
+    if (/^[A-Z]{4}$/.test(code)) {
+      try { exists = (await db.ref(DB_ROOT + '/' + code + '/meta/hostId').once('value')).exists(); } catch (e) { console.error(e); }
+    }
+    if (exists) enterRoom(code);
+    else { toast(T.errNoRoom); history.replaceState(null, '', location.pathname); }
+  }
+  S.boot = 'ok';
+  render();
+  setInterval(tick, 250);
+}
+
+function enterRoom(code) {
+  S.room = code; S.loaded = {}; S.joined = false;
+  const base = db.ref(DB_ROOT + '/' + code);
+  refs = { base, meta: base.child('meta'), players: base.child('players'), phase: base.child('phase'), me: base.child('players/' + S.uid),
+           deal: base.child('deal'), plays: base.child('plays'), votes: base.child('votes'), reactions: base.child('reactions') };
+  const onErr = e => { console.error(e); toast(T.errGeneric); };
+  refs.meta.on('value', s => {
+    const prev = S.meta && S.meta.hostId;
+    S.meta = s.val(); S.loaded.meta = true;
+    if (!S.meta) return leaveRoom(T.errNoRoom);
+    if (prev && prev !== S.meta.hostId) {
+      toast(S.meta.hostId === S.uid ? T.youHost : T.newHost((S.players[S.meta.hostId] || {}).name || '…'));
+      curKey = null;
+    }
+    render();
+  }, onErr);
+  refs.players.on('value', s => {
+    S.players = s.val() || {}; S.loaded.players = true;
+    const here = !!S.players[S.uid];
+    if (here && !S.joined) { S.joined = true; presence(); }
+    else if (here && S.players[S.uid].online === false && S.connected) presence();
+    else if (!here && S.joined) return leaveRoom(T.kicked);
+    render();
+  }, onErr);
+  refs.phase.on('value', s => { S.phase = s.val() || { state: 'lobby' }; S.loaded.phase = true; render(); }, onErr);
+  refs.plays.on('value', s => { S.plays = s.val() || {}; render(); }, () => {});
+  refs.votes.on('value', s => { S.votes = s.val() || {}; render(); }, () => {});
+  refs.deal.child(S.uid).on('value', s => {
+    S.stream = toArr(s.val()).filter(okMeme);
+    S.stream.forEach(i => { new Image().src = memeUrl(i); });      // підвантажуємо свої карти наперед
+    render();
+  }, () => {});
+  refs.reactions.on('child_added', onReaction, () => {});
+  refs.reactions.on('child_changed', onReaction, () => {});
+}
+
+function leaveRoom(msg) {
+  if (!S.room) return;
+  if (S.joined) refs.me.onDisconnect().cancel();
+  refs.meta.off(); refs.players.off(); refs.phase.off(); refs.plays.off(); refs.votes.off(); refs.deal.child(S.uid).off(); refs.reactions.off();
+  S.room = null; S.joined = false; S.meta = null; S.players = {}; S.phase = null; S.loaded = {}; S.plays = {}; S.votes = {}; S.stream = [];
+  history.replaceState(null, '', location.pathname);
+  if (msg) toast(msg);
+  render();
+}
+
+function presence() {
+  refs.me.onDisconnect().update({ online: false, lastSeen: TS });
+  refs.me.update({ online: true }).catch(() => {});
+}
+
+async function cleanupOldRooms() {
+  try {
+    const cutoff = serverNow() - DAY_MS - 5 * 60 * 1000;
+    const snap = await db.ref(DB_INDEX).orderByValue().endAt(cutoff).limitToFirst(25).once('value');
+    const codes = []; snap.forEach(ch => { codes.push(ch.key); });
+    for (const code of codes) {
+      await db.ref(DB_ROOT + '/' + code).remove();
+      await db.ref(DB_INDEX + '/' + code).remove();
+    }
+  } catch (e) { console.warn('cleanup skipped:', e && e.message); }
+}
+
+async function createRoom(profile) {
+  cleanupOldRooms();
+  for (let i = 0; i < 8; i++) {
+    const code = Array.from({ length: 4 }, () => rand(CODE_ABC)).join('');
+    try {
+      await db.ref(DB_ROOT + '/' + code).set({ meta: { hostId: S.uid, createdAt: TS, settings: DEFAULTS }, phase: { state: 'lobby' } });
+    } catch (e) { continue; }
+    db.ref(DB_INDEX + '/' + code).set(TS).catch(() => {});
+    history.replaceState(null, '', '?room=' + code);
+    enterRoom(code);
+    await joinRoom(profile);
+    return;
+  }
+  throw new Error('create failed');
+}
+
+function joinRoom(profile) {
+  return refs.me.set({ name: profile.name, avatar: profile.avatar, color: profile.color, online: true, joinedAt: TS });
+}
+
+/* =====================================================================
+   9. ЛОГІКА ГРИ
+   ===================================================================== */
+const clearGameData = () => Promise.all([refs.deal, refs.plays, refs.votes, refs.reactions].map(r => r.remove().catch(() => {})));
+
+// ситуації не повторюються між іграми: використані пам’ятає браузер ведучого
+function pickSituations(n) {
+  let used = LS.get('memUsedSits', []).filter(i => i < SITUATIONS.length);
+  let pool = SITUATIONS.map((_, i) => i).filter(i => !used.includes(i));
+  if (pool.length < n) { used = []; pool = SITUATIONS.map((_, i) => i); }
+  const picked = shuffle(pool).slice(0, n);
+  LS.set('memUsedSits', used.concat(picked));
+  return picked;
+}
+
+async function startGame() {
+  const ids = shuffle(eligible());
+  if (ids.length < 2) return toast(T.needPlayers);
+  const st = settings(), rounds = st.rounds, need = HAND + rounds - 1, all = () => shuffle(Array.from({ length: MEME_COUNT }, (_, i) => i));
+  // кожному — свій потік карт без повторів; колода тасується заново, коли закінчується
+  const deal = {}; let deck = [];
+  for (const id of ids) {
+    const stream = [];
+    while (stream.length < Math.min(need, MEME_COUNT)) {
+      const k = deck.findIndex(c => !stream.includes(c));
+      if (k < 0) { deck = deck.concat(all()); continue; }
+      stream.push(deck.splice(k, 1)[0]);
+    }
+    deal[id] = stream;
+  }
+  try {
+    await clearGameData();
+    await refs.deal.set(deal);
+    await refs.phase.set({ state: 'pick', round: 0, rounds, order: ids, sits: pickSituations(rounds), startedAt: TS, duration: st.pickSec });
+  } catch (e) { console.error(e); toast(T.errGeneric); }
+}
+
+// Фази перемикає ТІЛЬКИ клієнт ведучого
+async function hostGo(state) {
+  if (hostBusy || !isHost()) return;
+  hostBusy = true;
+  try {
+    const ph = S.phase, st = settings();
+    if (state === 'next') {
+      if (ph.round + 1 >= ph.rounds) await refs.phase.update({ state: 'final' });
+      else await refs.phase.update({ state: 'pick', round: ph.round + 1, startedAt: TS, duration: st.pickSec });
+    } else await refs.phase.update({ state, startedAt: TS, duration: state === 'vote' ? st.voteSec : SCORE_SEC });
+  } catch (e) { console.error(e); }
+  finally { hostBusy = false; }
+}
+
+async function endGame(ask) {
+  if (ask && !confirm(T.endConfirm)) return;
+  try { await refs.phase.set({ state: 'lobby' }); await clearGameData(); }
+  catch (e) { console.error(e); toast(T.errGeneric); }
+}
+
+function playCard(card) {
+  const ph = S.phase;
+  if (card == null || !ph || ph.state !== 'pick' || !inGame() || playsOf(ph.round)[S.uid] != null) return;
+  S.selected = null;
+  refs.plays.child(ph.round + '/' + S.uid).set(card).catch(() => {});
+}
+function castVote(target) {
+  const ph = S.phase;
+  if (!ph || ph.state !== 'vote' || target === S.uid) return;
+  refs.votes.child(ph.round + '/' + S.uid).set(target).catch(() => toast(T.sendFail));
+}
+
+function checkHost(now) {
+  if (!S.room || !S.meta || !S.loaded.players || !me() || isHost() || !S.connected) return;
+  const hp = S.players[S.meta.hostId];
+  if (hp && !(hp.online === false && now - (hp.lastSeen || now) > HOST_GONE_MS)) return;
+  if (now - S.claimAt < 3000) return;
+  const first = onlineIds().sort((a, b) => (S.players[a].joinedAt || 0) - (S.players[b].joinedAt || 0) || (a < b ? -1 : 1))[0];
+  if (first !== S.uid) return;
+  S.claimAt = now;
+  refs.meta.child('hostId').transaction(() => S.uid, () => {}, false);
+}
+
+function tick() {
+  const ph = S.phase, timer = $('#timer'), bar = $('#bar'), now = serverNow();
+  if (S.offsetReady) checkHost(now);
+  const timed = !!(S.room && me() && ph && (ph.state === 'pick' || ph.state === 'vote' || ph.state === 'score') && typeof ph.startedAt === 'number' && ph.duration);
+  timer.hidden = bar.hidden = !timed;
+  if (!timed || !S.offsetReady) return;
+  const left = (deadline() - now) / 1000, sec = Math.max(0, Math.ceil(left)), hot = sec <= 5 && ph.state !== 'score';
+  timer.textContent = sec;
+  timer.classList.toggle('danger', hot);
+  bar.classList.toggle('danger', hot);
+  bar.firstElementChild.style.width = clamp(left / ph.duration * 100, 0, 100) + '%';
+
+  const beepKey = ph.state + ':' + ph.round;
+  if (hot && sec > 0 && S.beeped !== beepKey) { S.beeped = beepKey; beep(); }
+
+  const r = ph.round, pl = playsOf(r);
+  // час вийшов — кидаємо обраний або випадковий мем
+  if (ph.state === 'pick' && left <= 0 && curKey === 'game' && inGame() && pl[S.uid] == null && now - S.autoAt > 1500) {
+    const hand = myHand();
+    S.autoAt = now;
+    if (hand.length) playCard(hand.includes(S.selected) ? S.selected : rand(hand));
+  }
+
+  if (!isHost() || !S.connected || hostBusy) return;
+  const fresh = now - ph.startedAt > 1500;
+  if (ph.state === 'pick') {
+    const ord = order();
+    const allIn = fresh && ord.some(id => pl[id] != null) && ord.every(id => pl[id] != null || isGone(id));
+    if (allIn || now >= deadline() + GRACE_MS) hostGo('vote');
+  } else if (ph.state === 'vote') {
+    const vt = votesOf(r), cards = Object.keys(pl);
+    const voters = onlineIds().filter(id => cards.some(c => c !== id));     // ті, кому є за кого голосувати
+    if ((fresh && voters.every(id => vt[id] != null)) || now >= deadline() + 1000) hostGo('score');
+  } else if (now >= deadline()) hostGo('next');
+}
+
+/* ---------- реакції ---------- */
+function fly(emoji) {
+  const layer = $('#fly');
+  if (layer.childElementCount > 70) return;
+  const el = h('span', { class: 'flyer', style: { left: (4 + Math.random() * 88) + '%', fontSize: (34 + Math.random() * 30) + 'px',
+    animationDuration: (1.5 + Math.random() * 0.8) + 's' } }, emoji);
+  layer.append(el);
+  setTimeout(() => el.remove(), 2500);
+}
+function sendReaction(emoji) {
+  const now = Date.now();
+  if (now - S.reactAt < 200) return;
+  S.reactAt = now;
+  refs.reactions.child(S.uid).set({ e: emoji, t: serverNow() }).catch(() => {});
+}
+function onReaction(snap) {
+  const v = snap.val();
+  if (!v || !REACTIONS.includes(v.e) || S.lastReact[snap.key] === v.t) return;
+  S.lastReact[snap.key] = v.t;
+  if (Math.abs(serverNow() - v.t) < 6000) fly(v.e);
+}
+const reactBar = () => h('div', { class: 'reacts' }, REACTIONS.map(e => h('button', { type: 'button', class: 'tb rx', onclick: () => sendReaction(e) }, e)));
+function openZoom(card) { const z = $('#zoom'); z.replaceChildren(h('img', { src: memeUrl(card), alt: '' })); z.hidden = false; }
+
+/* =====================================================================
+   10. ЕКРАНИ
+   ===================================================================== */
+function viewKey() {
+  if (S.boot !== 'ok') return S.boot;
+  if (!S.room) return 'home';
+  if (!(S.loaded.meta && S.loaded.players && S.loaded.phase)) return 'loading';
+  if (!me()) return 'join';
+  const st = S.phase.state;
+  return st === 'final' ? 'final' : (st === 'pick' || st === 'vote' || st === 'score') ? 'game' : 'lobby';
+}
+
+function render() {
+  const key = viewKey();
+  if (key !== curKey) {
+    curKey = key;
+    const root = $('#app'); root.replaceChildren(); window.scrollTo(0, 0);
+    if (key === 'setup') mountMessage(root, T.setupTitle, T.setupText);
+    else if (key === 'autherr') mountMessage(root, T.errAuthTitle, T.errAuth);
+    else if (key === 'loading') mountMessage(root, T.loading, '');
+    else if (key === 'home') {
+      mountProfile(root, false);
+      root.append(h('div', { class: 'narrow center', style: { marginTop: '28px' } },
+        h('a', { class: 'btn b', href: 'index.html', style: { display: 'inline-block', textDecoration: 'none' } }, T.otherGame)));
+    }
+    else if (key === 'join') mountProfile(root, true);
+    else if (key === 'lobby') mountLobby(root);
+    else if (key === 'game') mountGame(root);
+    else if (key === 'final') mountFinal(root);
+  }
+  refreshHeader();
+  if (key === 'lobby') refreshLobby();
+  else if (key === 'game') refreshGame();
+  else if (key === 'final') refreshFinal();
+}
+
+function refreshHeader() {
+  const ph = S.phase, on = S.boot === 'ok' && !!(S.room && me() && ph && ph.state !== 'lobby');
+  $('#hdr').hidden = !on;
+  if (!on) { $('#timer').hidden = $('#bar').hidden = true; return; }
+  $('#hdrRoom').textContent = S.room;
+  const b = $('#hdrPhase');
+  if (ph.state === 'final') { b.textContent = T.finalTitle; b.className = 'badge'; return; }
+  b.textContent = T.round(ph.round + 1, ph.rounds) + ' · ' + T.phase[ph.state];
+  b.className = 'badge ' + (ph.state === 'pick' ? 'bbg' : ph.state === 'vote' ? 'gbg' : 'ybg');
+}
+
+function mountMessage(root, title, text) {
+  root.append(h('div', { class: 'hero' }, logoEl('lg wobble'), h('h1', {}, T.appName)),
+    h('div', { class: 'card narrow center tilt-l' }, h('h2', {}, title), text && h('p', {}, text)));
+}
+
+/* ---------- старт / вхід: ім’я й аватар ---------- */
+function mountProfile(root, joining) {
+  const prof = LS.get('profile', {});
+  let avatar = isChar(prof.avatar) ? prof.avatar : rand(CHARS);
+  let color = AVATAR_COLORS.includes(prof.color) ? prof.color : rand(AVATAR_COLORS);
+  const name = h('input', { class: 'inp', maxLength: MAX_NAME, placeholder: T.namePh, value: prof.name || '', autocomplete: 'off', 'aria-label': T.yourName });
+  const preview = h('span', { class: 'ava xl' });
+  const emo = CHARS.map(c => h('button', { type: 'button', class: 'pk', onclick: () => { avatar = c; upd(); } }));
+  const dice = h('button', { type: 'button', class: 'pk', title: T.randomChar, 'aria-label': T.randomChar, onclick: () => { avatar = randomChar(); upd(); } }, '🎲');
+  const col = AVATAR_COLORS.map(c => h('button', { type: 'button', class: 'pk col', title: c, style: { background: c }, onclick: () => { color = c; upd(); } }));
+  function upd() {
+    preview.innerHTML = charSVG(avatar, color);
+    emo.forEach((b, i) => { b.classList.toggle('on', CHARS[i] === avatar); b.innerHTML = charSVG(CHARS[i], color); });
+    col.forEach((b, i) => { b.classList.toggle('on', AVATAR_COLORS[i] === color); b.style.background = AVATAR_COLORS[i]; });
+  }
+  upd();
+  const go = h('button', { type: 'button', class: 'btn big ' + (joining ? 'p' : ''), onclick: async () => {
+    const n = name.value.trim().slice(0, MAX_NAME);
+    if (!n) { toast(T.errName); name.focus(); return; }
+    const p = { name: n, avatar, color };
+    LS.set('profile', p);
+    go.disabled = true;
+    try { await (joining ? joinRoom(p) : createRoom(p)); }
+    catch (e) { console.error(e); toast(joining ? T.errGeneric : T.errCreate); }
+    go.disabled = false;
+  } }, joining ? T.join : T.createRoom);
+  name.addEventListener('keydown', e => { if (e.key === 'Enter') go.click(); });
+
+  root.append(
+    h('div', { class: 'hero' }, logoEl('lg wobble'), h('h1', {}, T.appName),
+      h('div', { class: 'tag tilt-r' }, joining ? T.roomLabel(S.room) : T.tagline)),
+    h('div', { class: 'card narrow stack' },
+      h('div', { class: 'row', style: { flexWrap: 'nowrap' } }, preview,
+        h('div', { class: 'grow' }, h('div', { class: 'lbl', style: { marginBottom: '6px' } }, T.yourName), name)),
+      h('div', {}, h('div', { class: 'lbl', style: { marginBottom: '8px' } }, T.pickAvatar), h('div', { class: 'pick chars' }, emo, dice)),
+      h('div', {}, h('div', { class: 'lbl', style: { marginBottom: '8px' } }, T.pickColor), h('div', { class: 'pick' }, col)),
+      h('div', { class: 'center' }, go)
+    )
+  );
+  if (!joining) {
+    const code = h('input', { class: 'inp disp', maxLength: 4, placeholder: T.codePh, autocomplete: 'off', autocapitalize: 'characters',
+      style: { width: '150px', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '.1em' } });
+    const enter = () => {
+      const c = code.value.trim().toUpperCase();
+      if (!/^[A-Z]{4}$/.test(c)) return toast(T.errCode);
+      location.search = '?room=' + c;
+    };
+    code.addEventListener('keydown', e => { if (e.key === 'Enter') enter(); });
+    root.append(h('div', { class: 'narrow center', style: { marginTop: '30px' } },
+      h('div', { class: 'lbl', style: { marginBottom: '10px' } }, T.orJoin),
+      h('div', { class: 'row', style: { justifyContent: 'center' } }, code, h('button', { type: 'button', class: 'btn w', onclick: enter }, T.enter))));
+  }
+}
+
+
+/* ---------- лобі ---------- */
+function mountLobby(root) {
+  lobbyCtlKey = null; S.selected = null; S.beeped = null; S.pile = null;
+  const link = location.origin + location.pathname + '?room=' + S.room;
+  root.append(
+    h('div', { class: 'hero' }, logoEl('lg wobble'), h('h1', {}, T.appName)),
+    h('div', { class: 'grid2' },
+      h('div', { class: 'stack', style: { gap: '26px' } },
+        h('div', { class: 'card ybg tilt-l' },
+          h('div', { class: 'lbl' }, T.roomCode),
+          h('div', { class: 'code disp' }, S.room),
+          h('div', { class: 'link' }, link),
+          h('button', { type: 'button', class: 'btn w', onclick: () => copyText(link) }, T.copyLink)),
+        h('div', { class: 'card tilt-r', id: 'lobbyCtl' })),
+      h('div', { class: 'card' }, h('h3', { id: 'plTitle' }), h('div', { class: 'plist', id: 'plList' }))
+    )
+  );
+}
+
+function refreshLobby() {
+  const ids = Object.keys(S.players).sort((a, b) => (S.players[a].joinedAt || 0) - (S.players[b].joinedAt || 0));
+  const host = isHost();
+  $('#plTitle').textContent = T.players(ids.length);
+  $('#plList').replaceChildren(...ids.map(id => {
+    const p = S.players[id];
+    return h('div', { class: 'pl' + (p.online === false ? ' off' : '') }, avatarEl(p), h('b', {}, p.name),
+      id === S.meta.hostId && h('span', { class: 'tagm' }, T.host),
+      id === S.uid && h('span', { class: 'tagm', style: { background: '#fff' } }, T.you),
+      h('span', { class: 'grow' }),
+      host && id !== S.uid && h('button', { type: 'button', class: 'btn sm p', title: T.kick, 'aria-label': T.kick,
+        onclick: () => { if (confirm(T.kickConfirm(p.name))) refs.players.child(id).remove(); } }, '✕'));
+  }));
+
+  const ctl = $('#lobbyCtl'), st = settings(), n = eligible().length;
+  if (lobbyCtlKey !== (host ? 'host' : 'guest')) {
+    lobbyCtlKey = host ? 'host' : 'guest';
+    if (host) {
+      const num = k => h('input', { type: 'number', class: 'inp num', id: 'set_' + k, min: LIMITS[k][0], max: LIMITS[k][1], inputMode: 'numeric',
+        onchange: e => { const v = clamp(parseInt(e.target.value, 10) || DEFAULTS[k], LIMITS[k][0], LIMITS[k][1]); e.target.value = v; refs.meta.child('settings/' + k).set(v); } });
+      ctl.replaceChildren(
+        h('h3', {}, T.settings),
+        h('label', { class: 'setrow' }, T.rounds, num('rounds')),
+        h('label', { class: 'setrow' }, T.pickSec, num('pickSec')),
+        h('label', { class: 'setrow' }, T.voteSec, num('voteSec')),
+        h('label', { class: 'setrow' }, T.hostPlays, h('input', { type: 'checkbox', class: 'chk', id: 'set_hostPlays',
+          onchange: e => refs.meta.child('settings/hostPlays').set(e.target.checked) })),
+        h('div', { class: 'hint', id: 'lobbyInfo', style: { margin: '12px 0' } }),
+        h('button', { type: 'button', class: 'btn big p', id: 'startBtn', style: { width: '100%' }, onclick: startGame }, T.start));
+    } else {
+      ctl.replaceChildren(h('h3', {}, T.waitHost), h('div', { class: 'hint', id: 'lobbyInfo', style: { marginTop: '10px' } }));
+    }
+  }
+  if (host) {
+    for (const k of ['rounds', 'pickSec', 'voteSec']) { const el = $('#set_' + k); if (document.activeElement !== el) el.value = st[k]; }
+    $('#set_hostPlays').checked = !!st.hostPlays;
+    $('#startBtn').disabled = n < 2;
+    $('#lobbyInfo').textContent = n < 2 ? T.needPlayers : T.lobbyInfo(n, st.rounds);
+  } else {
+    $('#lobbyInfo').textContent = T.settingsInfo(st);
+  }
+}
+
+/* ---------- стіл ---------- */
+function memeCard(card, cls) {
+  return h('div', { class: 'mcard ' + (cls || '') }, h('img', { src: memeUrl(card), alt: '' }),
+    h('button', { type: 'button', class: 'zoom', title: T.zoom, 'aria-label': T.zoom, onclick: e => { e.stopPropagation(); openZoom(card); } }, '🔍'));
+}
+
+function mountGame(root) {
+  S.keys = {}; S.pile = null;
+  root.append(h('div', { class: 'mwrap', id: 'mWrap' },
+    h('div', { class: 'seats top', id: 'seatsTop' }),
+    h('div', { class: 'table' }, h('div', { class: 'rail' },
+      h('div', { class: 'sit', id: 'mSit' }),
+      h('div', { class: 'mnote disp', id: 'mNote' }),
+      h('div', { class: 'pile', id: 'mPile' }),
+      h('div', { class: 'tgrid', id: 'mGrid' }))),
+    h('div', { class: 'seats bottom', id: 'seatsBot' }),
+    h('div', { id: 'mHand' }),
+    h('div', { class: 'mctl', id: 'mCtl' })));
+}
+
+// перебудовує частину екрана лише коли змінився її ключ — щоб анімації не програвалися повторно
+function keyed(name, key, fn) { if (S.keys[name] === key) return; S.keys[name] = key; fn(); }
+
+function refreshGame() {
+  const ph = S.phase, r = ph.round, st = ph.state, ord = order(), pl = playsOf(r), vt = votesOf(r), host = isHost();
+  const sc = scores(), tally = st === 'score' ? roundTally(r) : {};
+  const cardIds = Object.keys(pl).filter(id => okMeme(pl[id]));
+
+  // --- місця за столом ---
+  const seat = id => {
+    const p = S.players[id], played = pl[id] != null;
+    return h('div', { class: 'seat' + (id === S.uid ? ' me' : '') + (!p || p.online === false ? ' off' : '') + (st === 'pick' && !played ? ' think' : ''), title: p ? p.name : '' },
+      h('div', { class: 'sava' }, avatarEl(p),
+        st === 'pick' && played && h('span', { class: 'mini' }),
+        st === 'vote' && vt[id] != null && h('span', { class: 'mark' }, '✓'),
+        tally[id] && h('span', { class: 'plus' }, '+' + tally[id])),
+      h('span', { class: 'nm' }, p ? p.name : '—'),
+      h('span', { class: 'pts' }, String(sc[id] || 0)));
+  };
+  const half = Math.ceil(ord.length / 2);
+  $('#seatsTop').replaceChildren(...ord.slice(0, half).map(seat));
+  $('#seatsBot').replaceChildren(...ord.slice(half).map(seat));
+  $('#mWrap').classList.toggle('dense', ord.length > 14);
+
+  // --- ситуація й підказка ---
+  keyed('sit', r, () => { $('#mSit').textContent = SITUATIONS[toArr(ph.sits)[r]] || '…'; });
+  const note = $('#mNote');
+  if (st === 'pick') note.textContent = T.notePick(cardIds.length, ord.length);
+  else if (st === 'vote') {
+    const voters = onlineIds().filter(id => cardIds.some(c => c !== id));
+    note.textContent = T.noteVote(voters.filter(id => vt[id] != null).length, voters.length);
+  } else {
+    const max = Math.max(0, ...cardIds.map(id => tally[id] || 0));
+    const winners = cardIds.filter(id => max > 0 && tally[id] === max).map(id => (S.players[id] || {}).name || '—');
+    note.textContent = winners.length ? T.noteWin(winners.join(', ')) : T.noteNoWin;
+  }
+
+  // --- карти на столі ---
+  const pile = $('#mPile'), grid = $('#mGrid');
+  pile.hidden = st !== 'pick'; grid.hidden = st === 'pick';
+  if (st === 'pick') {
+    if (!S.pile || S.pile.r !== r) { S.pile = { r, ids: new Set() }; pile.replaceChildren(); }
+    for (const id of cardIds) {
+      if (S.pile.ids.has(id)) continue;
+      S.pile.ids.add(id);
+      const c = h('div', { class: 'mcard back' }, logoEl());           // сорочкою догори: що саме кинули, поки не видно
+      c.style.setProperty('--r', Math.round(Math.random() * 44 - 22) + 'deg');
+      pile.append(c);
+    }
+  } else {
+    keyed('grid', r + ':' + st + ':' + cardIds.slice().sort().join(), () => {
+      const ids = cardIds.slice().sort((a, b) => st === 'score' ? (tally[b] || 0) - (tally[a] || 0) || (a < b ? -1 : 1) : (a < b ? -1 : 1));
+      const max = Math.max(0, ...ids.map(id => tally[id] || 0));
+      grid.replaceChildren(...ids.map((id, i) => {
+        const p = S.players[id], own = id === S.uid, win = st === 'score' && max > 0 && tally[id] === max;
+        const card = memeCard(pl[id], st === 'vote' && !own ? 'click' : '');
+        if (st === 'vote' && !own) card.addEventListener('click', () => castVote(id));
+        if (st === 'score') card.append(h('span', { class: 'vb' }, (win ? '👑 ' : '') + (tally[id] || 0)));
+        return h('div', { class: 'tcell' + (win ? ' win' : ''), 'data-id': id, style: { animationDelay: (i * 70) + 'ms' } }, card,
+          h('div', { class: 'who' }, avatarEl(p), h('b', {}, p ? p.name : '—'), own && h('span', { class: 'tagm' }, T.yourMeme)));
+      }));
+      if (!ids.length) grid.replaceChildren(h('div', { class: 'hint center', style: { fontWeight: 800 } }, T.noCards));
+    });
+    grid.querySelectorAll('.tcell').forEach(c => c.classList.toggle('on', st === 'vote' && vt[S.uid] === c.dataset.id));
+  }
+
+  // --- моя рука ---
+  const playing = inGame(), played = pl[S.uid] != null, hand = st === 'pick' && playing ? myHand() : [];
+  if (!hand.includes(S.selected)) S.selected = null;
+  keyed('hand', [r, st, playing, played, S.selected, hand.join()].join(':'), () => {
+    const box = $('#mHand');
+    if (st !== 'pick') return box.replaceChildren();
+    if (!playing) return box.replaceChildren(h('div', { class: 'hint center', style: { fontWeight: 800, marginTop: '24px' } }, T.spectator));
+    const mid = (hand.length - 1) / 2;
+    box.replaceChildren(
+      h('div', { class: 'handbar' }, h('span', { class: 'lbl' }, played ? T.played : T.yourHand), h('span', { class: 'grow' }),
+        !played && h('button', { type: 'button', class: 'btn big p', id: 'throwBtn', disabled: S.selected == null, onclick: () => playCard(S.selected) }, T.throwBtn)),
+      h('div', { class: 'hand' + (played ? ' done' : '') }, hand.map((card, i) => {
+        const el = memeCard(card, card === S.selected ? 'sel' : '');
+        el.style.setProperty('--rot', ((i - mid) * 4) + 'deg');
+        el.style.setProperty('--dy', (Math.abs(i - mid) * 7) + 'px');
+        if (!played) el.addEventListener('click', () => { S.selected = card; render(); });
+        return el;
+      })));
+  });
+
+  // --- керування ---
+  keyed('ctl', st + ':' + host + ':' + (r + 1 >= ph.rounds), () => {
+    const ctl = $('#mCtl'), kids = [
+      st !== 'pick' && reactBar(),
+      host && st === 'pick' && h('button', { type: 'button', class: 'btn sm w', onclick: () => hostGo('vote') }, T.endPick),
+      host && st === 'vote' && h('button', { type: 'button', class: 'btn sm w', onclick: () => hostGo('score') }, T.showScore),
+      host && st === 'score' && h('button', { type: 'button', class: 'btn big', onclick: () => hostGo('next') }, r + 1 >= ph.rounds ? T.toFinal : T.nextRound),
+      host && h('button', { type: 'button', class: 'btn sm w', onclick: () => endGame(true) }, T.endGame)
+    ].filter(Boolean);
+    ctl.replaceChildren(...kids);
+    ctl.hidden = !kids.length;
+  });
+}
+
+/* ---------- фінал ---------- */
+function mountFinal(root) {
+  S.keys = {};
+  root.append(h('div', { class: 'album', id: 'finBox' }));
+  for (let i = 0; i < 16; i++) setTimeout(() => { if (curKey === 'final') fly(rand(['🎉', '🏆', '⭐', '🃏'])); }, i * 120);
+}
+
+function refreshFinal() {
+  const sc = scores(), host = isHost();
+  const ids = order().slice().sort((a, b) => sc[b] - sc[a] || (a < b ? -1 : 1));
+  keyed('final', JSON.stringify([ids.map(id => [id, sc[id], !!S.players[id]]), host]), () => {
+    const medals = ['🏆', '🥈', '🥉'];
+    $('#finBox').replaceChildren(...[
+      h('div', { class: 'alhead' }, h('h1', {}, T.finalTitle)),
+      ...ids.slice(0, 3).map((id, i) => {
+        const p = S.players[id];
+        return h('div', { class: 'pod' + (i === 0 ? ' first tilt-l' : i === 1 ? ' tilt-r' : '') },
+          h('span', { class: 'medal' }, medals[i]), avatarEl(p, i === 0 ? 'xl' : ''),
+          h('div', { class: 'grow', style: { minWidth: '0' } }, h('div', { class: 'vtext' }, p ? p.name : '—')),
+          h('b', { class: 'disp', style: { fontSize: i === 0 ? '30px' : '20px', whiteSpace: 'nowrap' } }, T.points(sc[id])));
+      }),
+      ...ids.slice(3).map((id, i) => {
+        const p = S.players[id];
+        return h('div', { class: 'rank' }, h('span', { class: 'n' }, (i + 4) + '.'), avatarEl(p), h('span', { class: 'grow' }, p ? p.name : '—'), h('span', {}, T.points(sc[id])));
+      }),
+      h('div', { class: 'alctl' }, reactBar(), host && h('button', { type: 'button', class: 'btn big p', onclick: () => endGame(false) }, T.newGame))
+    ].filter(Boolean));
+  });
+}
+
+init();
+</script>
+</body>
+</html>
