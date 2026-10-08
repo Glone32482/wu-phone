@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<title>WU Phone</title>
+<link rel="icon" id="favicon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Unbounded:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --y:#F4C93F; --k:#111; --bg:#FFF8E7; --p:#E0506E; --b:#7EC8E3; --g:#A8E06A;
+  --bd:3px solid var(--k); --sh:5px 5px 0 var(--k); --sh-s:3px 3px 0 var(--k);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--k)}
+body{font:500 18px/1.4 Manrope,system-ui,sans-serif;min-height:100dvh;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+h1,h2,h3,.disp{font-family:Unbounded,"Arial Black",sans-serif;font-weight:900;line-height:1.1;margin:0}
+h1{font-size:clamp(34px,7vw,64px)} h2{font-size:clamp(22px,4vw,34px)} h3{font-size:18px}
+.grow{flex:1}
+.ybg{background:var(--y)!important}.bbg{background:var(--b)!important}.gbg{background:var(--g)!important}.pbg{background:var(--p)!important}
+.tilt-l{transform:rotate(-1.4deg)}.tilt-r{transform:rotate(1.2deg)}
+
+/* ---------- кнопки, картки, поля ---------- */
+.btn{font:900 17px/1.1 Unbounded,"Arial Black",sans-serif;padding:16px 22px;border:var(--bd);border-radius:12px;background:var(--y);color:var(--k);
+  box-shadow:var(--sh);cursor:pointer;transition:transform .08s,box-shadow .08s;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+@media(hover:hover){.btn:hover:not(:disabled){transform:translate(2px,2px);box-shadow:var(--sh-s)}}
+.btn:active:not(:disabled){transform:translate(4px,4px);box-shadow:1px 1px 0 var(--k)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.p{background:var(--p)}.btn.w{background:#fff}.btn.b{background:var(--b)}.btn.g{background:var(--g)}
+.btn.big{font-size:clamp(20px,3vw,26px);padding:20px 30px}
+.btn.sm{font-size:13px;padding:9px 12px;border-radius:10px;box-shadow:var(--sh-s)}
+@media(hover:hover){.btn.sm:hover:not(:disabled){transform:translate(1px,1px);box-shadow:2px 2px 0 var(--k)}}
+.btn.sm:active:not(:disabled){transform:translate(3px,3px);box-shadow:0 0 0 var(--k)}
+.card{background:#fff;border:var(--bd);box-shadow:var(--sh);border-radius:16px;padding:20px}
+.inp{font:700 20px/1.3 Manrope,system-ui,sans-serif;padding:14px 16px;border:var(--bd);border-radius:12px;background:#fff;color:var(--k);width:100%;outline:none}
+.inp:focus{box-shadow:var(--sh)}
+.inp.area{resize:none;font-size:24px;min-height:120px}
+.inp.num{width:110px;text-align:center}
+.lbl{font:800 13px/1.2 Manrope,sans-serif;text-transform:uppercase;letter-spacing:.06em}
+.hint{font-size:16px;opacity:.75}
+.row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.center{text-align:center}
+
+/* ---------- логотип ---------- */
+.logo{display:inline-block;width:44px;aspect-ratio:1;flex:none}
+.logo svg{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(3px 3px 0 #111)}
+.logo.lg{width:clamp(110px,22vw,160px)}
+.logo.lg svg{filter:drop-shadow(6px 6px 0 #111)}
+.wobble{animation:wobble 1.6s ease-in-out infinite alternate}
+@keyframes wobble{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+
+/* ---------- шапка ---------- */
+#hdr{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:8px 14px;background:var(--y);border-bottom:var(--bd)}
+#hdr .title{font-size:18px}
+.chip,.badge{font:800 14px/1 Manrope,sans-serif;padding:8px 10px;border:var(--bd);border-radius:10px;background:#fff;white-space:nowrap}
+.chip{letter-spacing:.12em}
+.timer{font:900 26px/1 Unbounded,sans-serif;min-width:78px;text-align:center;padding:8px 10px;border:var(--bd);border-radius:10px;background:#fff;box-shadow:var(--sh-s);font-variant-numeric:tabular-nums}
+.timer.danger{background:var(--p);animation:shake .3s steps(2) infinite}
+@keyframes shake{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
+#bar{position:sticky;top:0;height:10px;background:#fff;border-bottom:var(--bd);z-index:19}
+#bar i{display:block;height:100%;background:var(--k);width:100%}
+#bar.danger i{background:var(--p)}
+@media(max-width:560px){#hdr .title{display:none}#hdr{gap:8px;padding:6px 10px}.timer{font-size:22px;min-width:62px}.chip,.badge{font-size:12px;padding:7px 8px}#hdr .chip{display:none}}
+
+#app{max-width:1120px;margin:0 auto;padding:18px 16px 40px}
+.narrow{max-width:680px;margin:0 auto}
+.stack{display:flex;flex-direction:column;gap:18px}
+.hero{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;margin:14px 0 26px}
+.hero .tag{font:800 18px Manrope,sans-serif;background:#fff;border:var(--bd);border-radius:10px;padding:6px 12px;box-shadow:var(--sh-s)}
+
+/* ---------- аватари ---------- */
+.ava{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:var(--bd);border-radius:50%;background:#fff;font-size:21px;line-height:1;flex:none}
+.ava.xl{width:76px;height:76px;font-size:40px;box-shadow:var(--sh-s)}
+.pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:8px}
+.pk{aspect-ratio:1;font-size:24px;line-height:1;border:var(--bd);border-radius:10px;background:#fff;cursor:pointer;padding:0;transition:transform .08s}
+.pk.col{border-radius:50%}
+.pk.on{box-shadow:var(--sh-s);transform:translate(-2px,-2px) scale(1.06);background:var(--y)}
+
+/* ---------- лобі ---------- */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start;margin-bottom:26px}
+@media(max-width:780px){.grid2{grid-template-columns:1fr}}
+.code{font-size:clamp(54px,12vw,96px);letter-spacing:.08em;margin:6px 0 10px}
+.link{font:700 15px/1.3 Manrope,sans-serif;word-break:break-all;background:#fff;border:var(--bd);border-radius:10px;padding:8px 10px;margin-bottom:14px}
+.plist{display:flex;flex-direction:column;gap:8px;margin-top:12px;max-height:420px;overflow:auto;padding:2px 6px 6px 2px}
+.pl{display:flex;align-items:center;gap:10px}
+.pl b{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl .tagm{font:700 12px Manrope,sans-serif;background:var(--y);border:2px solid var(--k);border-radius:8px;padding:2px 6px;white-space:nowrap}
+.pl.off{filter:grayscale(1);opacity:.45}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0;font-weight:700}
+.chk{width:30px;height:30px;accent-color:var(--k)}
+
+/* ---------- гра ---------- */
+.work{display:flex;flex-direction:column;gap:18px}
+.prompt{border:var(--bd);box-shadow:var(--sh);border-radius:14px;padding:14px 18px;background:#fff}
+.ptext{font:800 clamp(20px,3.2vw,30px)/1.25 Manrope,sans-serif;margin-top:4px;overflow-wrap:anywhere}
+.draw{display:grid;grid-template-columns:minmax(0,1fr) 216px;gap:22px;align-items:start}
+.padwrap{border:var(--bd);box-shadow:var(--sh);background:#fff;width:100%;max-width:max(280px,calc((100dvh - 270px)*4/3));margin:0 auto;line-height:0}
+.padwrap canvas,.padwrap img{display:block;width:100%;height:auto;aspect-ratio:4/3;background:#fff}
+.padwrap canvas{touch-action:none;cursor:crosshair}
+.padwrap.view{max-width:max(260px,calc((100dvh - 400px)*4/3))}
+.tools{display:flex;flex-direction:column;gap:14px}
+.pal{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.sw{aspect-ratio:1;border:var(--bd);border-radius:9px;cursor:pointer;padding:0}
+.sw.on{box-shadow:var(--sh-s);transform:translate(-2px,-2px) scale(1.08)}
+.trow{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.trow.five{grid-template-columns:repeat(5,1fr)}
+.tb{height:46px;border:var(--bd);border-radius:10px;background:#fff;cursor:pointer;font-size:20px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+.tb.on{background:var(--y);box-shadow:var(--sh-s);transform:translate(-2px,-2px)}
+.tb:active{transform:translate(2px,2px)}
+.tb i{display:block;background:var(--k);border-radius:50%}
+@media(max-width:820px){
+  .draw{grid-template-columns:1fr;gap:16px}
+  .pal{grid-template-columns:repeat(8,1fr)}
+  .padwrap{max-width:max(280px,calc((100dvh - 200px)*4/3))}
+}
+.stcount{font:800 14px Manrope,sans-serif;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.status{display:flex;flex-wrap:wrap;gap:10px}
+.st{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px}
+.st .mark{position:absolute;left:26px;top:-6px;width:22px;height:22px;border:2px solid var(--k);border-radius:50%;background:#fff;font:800 12px/18px Manrope,sans-serif;text-align:center}
+.st.ok .mark{background:var(--g)}
+.st.off .ava,.st.off .nm{filter:grayscale(1);opacity:.4}
+.status.big{gap:18px 14px;justify-content:center}
+.status.big .st{width:92px}
+.status.big .ava{width:60px;height:60px;font-size:32px}
+.status.big .mark{left:58px;width:28px;height:28px;font-size:15px;line-height:24px}
+.st .nm{font:700 13px/1.2 Manrope,sans-serif;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.waitbox{text-align:center;display:flex;flex-direction:column;gap:20px;align-items:center;margin-top:10px}
+
+/* ---------- альбом ---------- */
+.album{max-width:720px;margin:0 auto}
+.alhead{text-align:center;margin-bottom:22px}
+.alhead .sub{font-weight:800;margin-top:8px}
+.step{margin:0 0 26px}
+.who{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:17px}
+.who b{font-weight:800}
+.say{font:800 clamp(22px,3.6vw,32px)/1.25 Manrope,sans-serif;padding:18px 22px;border:var(--bd);box-shadow:var(--sh);border-radius:14px;overflow-wrap:anywhere}
+.shot{display:block;width:100%;aspect-ratio:4/3;border:var(--bd);box-shadow:var(--sh);background:#fff}
+.pop{animation:pop .16s cubic-bezier(.2,1.5,.5,1) both}
+@keyframes pop{from{opacity:0;transform:scale(.8) translateY(20px)}}
+.alctl{position:sticky;bottom:0;z-index:10;display:flex;flex-wrap:wrap;gap:12px 14px;justify-content:center;align-items:center;padding:14px 8px;background:var(--bg);border-top:var(--bd);margin-top:10px}
+
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,calc(100% + 40px));z-index:50;max-width:calc(100vw - 32px);font-weight:800;background:var(--k);color:#fff;border:3px solid #fff;border-radius:12px;padding:12px 18px;transition:transform .12s;text-align:center}
+#toast.on{transform:translate(-50%,0)}
+#offline{position:fixed;top:0;left:0;right:0;z-index:60;background:var(--p);border-bottom:var(--bd);text-align:center;font-weight:800;padding:8px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header id="hdr" hidden>
+  <span class="logo" id="hdrLogo"></span>
+  <span class="title disp">WU Phone</span>
+  <span class="chip" id="hdrRoom"></span>
+  <span class="badge" id="hdrPhase"></span>
+  <span class="grow"></span>
+  <span class="timer" id="timer" hidden></span>
+  <button class="btn sm w" id="mute" type="button"></button>
+</header>
+<div id="bar" hidden><i></i></div>
+<main id="app"></main>
+<div id="toast" role="status"></div>
+<div id="offline" hidden></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+'use strict';
+/* =====================================================================
+   1. FIREBASE-КОНФІГ — встав сюди дані свого проєкту (див. README.md)
+   ===================================================================== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAWBEHD0D6z6iDdZGVF63N66BqU36vMcIA",
+  authDomain: "glone-aa288.firebaseapp.com",
+  databaseURL: "https://glone-aa288-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "glone-aa288",
+  appId: "1:200602622314:web:32f920ec4dcde9afb52d13"
+};
+
+/* =====================================================================
+   2. НАЛАШТУВАННЯ ГРИ
+   ===================================================================== */
+const DEFAULTS = { writeSec: 40, drawSec: 90, maxRounds: 10, hostPlays: true };
+const LIMITS   = { writeSec: [10, 300], drawSec: [20, 600], maxRounds: [2, 20] }; // ті самі межі — у database.rules.json
+const MAX_NAME = 20, MAX_TEXT = 100;
+const GRACE_MS = 4000;   // скільки ведучий чекає автовідправок після кінця таймера
+const GONE_MS  = 8000;   // після стількох мс офлайну гравця не чекаємо
+const DAY_MS   = 24 * 60 * 60 * 1000;
+const IMG_W = 640, IMG_H = 480, IMG_MAX_CHARS = 68000; // ≈ 50 КБ у base64
+
+/* =====================================================================
+   3. УСІ ТЕКСТИ ІНТЕРФЕЙСУ
+   ===================================================================== */
+const T = {
+  appName: 'WU Phone',
+  tagline: 'Зіпсований телефон із малюнками',
+  setupTitle: 'Потрібно налаштувати Firebase',
+  setupText: 'Відкрий index.html, знайди блок FIREBASE_CONFIG на початку скрипта і встав туди конфіг свого проєкту. Покрокова інструкція — у README.md.',
+  loading: 'Завантаження…',
+  yourName: 'Твоє ім’я',
+  namePh: 'Наприклад, Оля з дизайну',
+  pickAvatar: 'Обери аватар',
+  pickColor: 'і колір',
+  createRoom: 'Створити кімнату',
+  join: 'Приєднатися',
+  orJoin: 'або введи код кімнати',
+  codePh: 'КОД',
+  enter: 'Увійти',
+  roomLabel: code => `Кімната ${code}`,
+  roomCode: 'Код кімнати',
+  copyLink: 'Скопіювати посилання',
+  copied: 'Посилання скопійовано!',
+  players: n => `Гравці (${n})`,
+  host: '👑 ведучий',
+  you: 'це ти',
+  kick: 'Вилучити гравця',
+  kickConfirm: name => `Вилучити гравця «${name}»?`,
+  kicked: 'Ведучий вилучив тебе з кімнати',
+  settings: 'Налаштування',
+  writeSec: 'Час на текст, с',
+  drawSec: 'Час на малюнок, с',
+  maxRounds: 'Максимум раундів',
+  hostPlays: 'Ведучий теж грає',
+  roundsInfo: (players, rounds) => `Гравців: ${players} · раундів: ${rounds}`,
+  settingsInfo: s => `✍️ ${s.writeSec} с · 🎨 ${s.drawSec} с · до ${s.maxRounds} раундів`,
+  start: 'Почати',
+  needPlayers: 'Потрібно щонайменше 2 гравці',
+  waitHost: 'Чекаємо, поки ведучий почне гру…',
+  round: (r, n) => `Раунд ${r}/${n}`,
+  kind: { write: 'Пиши', draw: 'Малюй', describe: 'Описуй' },
+  writeTitle: 'Придумай фразу',
+  writeHint: 'Щось смішне — наступний гравець муситиме це намалювати',
+  writePh: 'Наприклад: кіт проводить співбесіду…',
+  noIdeas: 'Немає ідей',
+  drawTitle: 'Намалюй цю фразу',
+  describeTitle: 'Опиши словами цей малюнок',
+  describePh: 'Що тут намальовано?',
+  done: 'Готово',
+  sending: 'Надсилаємо…',
+  emptyText: 'Спершу напиши хоч щось 🙂',
+  sendFail: 'Не вдалося надіслати. Перевір інтернет.',
+  skipped: '🙈 гравець пропустив хід',
+  noWords: '🤷 без слів',
+  waitTitle: 'Готово! Чекаємо на інших…',
+  watchTitle: 'Гра вже триває',
+  watchText: 'Ти приєднаєшся в наступній грі. А поки стеж за перебігом.',
+  hostWatchTitle: 'Ти ведучий',
+  hostWatchText: 'Стеж за грою — раунди перемикаються автоматично.',
+  submitted: (a, b) => `Здали: ${a}/${b}`,
+  forceNext: 'Завершити раунд зараз',
+  forceConfirm: 'Завершити раунд для всіх просто зараз?',
+  tools: { brush: 'Пензель', eraser: 'Гумка', fill: 'Заливка', undo: 'Скасувати', clear: 'Очистити' },
+  albumTitle: 'Альбом',
+  chainOf: (i, n, name) => `Ланцюжок ${i}/${n} · починає ${name}`,
+  stepOf: (i, n) => `Крок ${i} з ${n}`,
+  wrote: 'пише',
+  drew: 'малює',
+  next: 'Далі ▶',
+  prev: '◀ Назад',
+  nextChain: 'Наступний ланцюжок ⏭',
+  download: '⬇ Завантажити ланцюжок',
+  newGame: 'Нова гра',
+  newGameConfirm: 'Почати нову гру? Поточний альбом буде видалено.',
+  hostFlips: 'Ведучий гортає альбом',
+  theEnd: 'Це був останній ланцюжок 🎉',
+  soundOn: 'Звук увімкнено — натисни, щоб вимкнути',
+  soundOff: 'Звук вимкнено — натисни, щоб увімкнути',
+  errName: 'Введи ім’я',
+  errCode: 'Код кімнати — це 4 латинські літери',
+  errNoRoom: 'Кімнату не знайдено. Перевір код або створи нову.',
+  errCreate: 'Не вдалося створити кімнату. Спробуй ще раз.',
+  errAuthTitle: 'Не вдалося підключитися',
+  errAuth: 'Перевір Firebase-конфіг і чи ввімкнено анонімний вхід (Authentication → Sign-in method → Anonymous).',
+  errGeneric: 'Щось пішло не так. Онови сторінку.',
+  offline: 'Немає з’єднання. Пробуємо підключитися…',
+  pngChain: name => `Ланцюжок від ${name}`,
+  pngFooter: 'Зроблено у WU Phone'
+};
+
+/* =====================================================================
+   4. БАНК СТАРТОВИХ ФРАЗ («Немає ідей») — редагуй як завгодно
+   ===================================================================== */
+const PHRASES = [
+  'Кіт проводить співбесіду з собакою',
+  'Борщ, який утік із каструлі',
+  'Програміст уперше за тиждень бачить сонце',
+  'Бабуся обганяє всіх на електросамокаті',
+  'Пінгвін замовляє каву на вівсяному молоці',
+  'Дедлайн наздоганяє менеджера',
+  'Єнот краде ноутбук із коворкінгу',
+  'Козак на гіроборді',
+  'Вареник мріє стати пельменем',
+  'Понеділок у вигляді монстра',
+  'Жираф застряг у ліфті',
+  'Кавоварка захопила офіс',
+  'Дзвінок, який міг бути листом',
+  'Їжак на першому побаченні',
+  'Баг, який виявився фічею',
+  'Корова на сесії у психолога',
+  'Привид боїться заходити в темну кімнату',
+  'Котлета тікає з їдальні',
+  'Тімлід дресирує гумових качок',
+  'Гусак викрав чиюсь зарплату',
+  'Картопля на пляжі в сонцезахисних окулярах',
+  'Робот учиться танцювати гопак',
+  'Дизайнер пересуває кнопку на один піксель',
+  'Сервер упав і не хоче вставати',
+  'Равлик запізнюється на роботу',
+  'Кіт ходить по клавіатурі під час релізу',
+  'Диван, який не відпускає людину',
+  'Wi-Fi зник у найважливіший момент',
+  'Лелека приніс не ту посилку',
+  'Сало сіло на дієту',
+  'Авокадо шукає свою другу половинку',
+  'Офісний кактус планує втечу',
+  'Бухгалтер танцює після закриття кварталу',
+  'Динозавр намагається застелити ліжко',
+  'Черга до мікрохвильовки на пів офісу',
+  'Єдиноріг чекає на маршрутку',
+  'Сова на ранковому стендапі',
+  'Хом’як сховав за щоки весь бюджет',
+  'Кавун іде у відпустку',
+  'Голуб проводить презентацію для інвесторів'
+];
+
+/* =====================================================================
+   5. АВАТАРИ, ПАЛІТРА, ЛОГОТИП
+   ===================================================================== */
+const EMOJIS = ['🦊','🐸','🐼','🦄','🐙','🐝','🦖','🐧','🐱','🐶','🦉','🐷','🐵','🦁','🐨','🐔','🦀','🐳','🍕','🌵','🚀','👾','🤖','🎸'];
+const AVATAR_COLORS = ['#F4C93F','#E0506E','#7EC8E3','#A8E06A','#FF9F5A','#B79CFF','#FFB3D1','#FFFFFF'];
+// палітра малювалки — навмисно не збігається з кольорами інтерфейсу
+const PALETTE = ['#000000','#6B6B6B','#C4C4C4','#FFFFFF','#E53935','#FF8A00','#FFE600','#2EAD4B',
+                 '#0B6B3A','#00B8B0','#1E88E5','#0D2C8A','#8E24AA','#FF6FB5','#8B5A2B','#F2C29B'];
+const BRUSHES = [4, 9, 18, 34];           // у пікселях полотна 800×600
+const CODE_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+const C = { y: '#F4C93F', k: '#111111', bg: '#FFF8E7', b: '#7EC8E3', g: '#A8E06A' };
+
+// Літери «WU» намальовані контурами, тож логотип однаковий у SVG, favicon і на PNG
+const LOGO_PATH = 'M14 36.5H23.5L26.04 47.5L30 36.5H38L41.96 47.5L44.5 36.5H54L47.75 63.5H38.25L34 49.6L29.75 63.5H20.25Z' +
+                  'M56 36.5H65.5V52.5a5.5 3 0 0 0 11 0V36.5H86V53a15 10.5 0 0 1-30 0Z';
+const LOGO_T = 'translate(50 50) scale(.92) translate(-50 -50)';
+const LOGO_SVG = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="WU"><circle cx="50" cy="50" r="48" fill="${C.y}" stroke="${C.k}" stroke-width="3" vector-effect="non-scaling-stroke"/><path transform="${LOGO_T}" d="${LOGO_PATH}" fill="${C.k}"/></svg>`;
+const FAVICON_SVG = `<svg viewBox="-4 -4 114 114" xmlns="http://www.w3.org/2000/svg"><circle cx="57" cy="57" r="48" fill="${C.k}"/><circle cx="50" cy="50" r="48" fill="${C.y}" stroke="${C.k}" stroke-width="6"/><path transform="${LOGO_T}" d="${LOGO_PATH}" fill="${C.k}"/></svg>`;
+
+/* =====================================================================
+   6. ДОПОМІЖНЕ
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const rand = a => a[Math.floor(Math.random() * a.length)];
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const okImg = v => typeof v === 'string' && /^data:image\/(webp|jpeg|png);base64,/.test(v);
+const okColor = v => /^#[0-9a-fA-F]{6}$/.test(v || '') ? v : '#FFFFFF';
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem('wuphone.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('wuphone.' + k, JSON.stringify(v)); } catch (e) {} }
+};
+
+function h(tag, props, ...kids) {
+  const el = document.createElement(tag);
+  for (const k in props || {}) {
+    const v = props[k];
+    if (v == null || v === false) continue;
+    if (k === 'class') el.className = v;
+    else if (k === 'style') Object.assign(el.style, v);
+    else if (k === 'html') el.innerHTML = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k in el) el[k] = v;
+    else el.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) {
+    if (c == null || c === false) continue;
+    el.append(c.nodeType ? c : document.createTextNode(c));
+  }
+  return el;
+}
+const logoEl = cls => h('span', { class: 'logo ' + (cls || ''), html: LOGO_SVG });
+const avatarEl = (p, cls) => h('span', { class: 'ava ' + (cls || ''), style: { background: okColor(p && p.color) } }, (p && p.avatar) || '👤');
+
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('on'), 2800);
+}
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); }
+  catch (e) {
+    const ta = h('textarea', { value: text }); document.body.append(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e2) {}
+    ta.remove();
+  }
+  toast(T.copied);
+}
+
+/* ---------- звук ---------- */
+let audioCtx = null;
+function unlockAudio() {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  } catch (e) {}
+}
+function beep() {
+  if (S.muted || !audioCtx) return;
+  try {
+    [880, 660].forEach((f, i) => {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain(), t = audioCtx.currentTime + i * 0.17;
+      o.type = 'square'; o.frequency.value = f; g.gain.value = 0.07;
+      o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t + 0.13);
+    });
+  } catch (e) {}
+}
+
+/* =====================================================================
+   7. СТАН І ДОСТУП ДО НЬОГО
+   ===================================================================== */
+const S = {
+  boot: 'loading',          // setup | loading | autherr | ok
+  uid: null, room: null,
+  meta: null, players: {}, phase: null, loaded: {},
+  joined: false, connected: false, offset: 0, offsetReady: false,
+  submitting: false, beeped: null, muted: LS.get('muted', false),
+  album: { cache: {}, loading: null, key: null, shown: null }
+};
+let db, TS, refs = {}, curKey = null, work = null, hostBusy = false, lobbyCtlKey = null;
+
+const serverNow = () => Date.now() + S.offset;
+const me = () => S.players[S.uid];
+const isHost = () => !!S.meta && S.meta.hostId === S.uid;
+const settings = () => Object.assign({}, DEFAULTS, S.meta && S.meta.settings);
+const order = () => { const o = S.phase && S.phase.order; return !o ? [] : Array.isArray(o) ? o : Object.values(o); };
+const myIdx = () => order().indexOf(S.uid);
+const roundKind = r => r === 0 ? 'write' : (r % 2 ? 'draw' : 'describe');
+// ланцюжок i в раунді r дістається гравцю (i + r) % N  ⇔  гравець p працює з ланцюжком (p − r) mod N
+const chainFor = (p, r, n) => (((p - r) % n) + n) % n;
+const isDone = id => !!(S.phase && S.phase.done && S.phase.done[id] === S.phase.round);
+const isGone = id => { const p = S.players[id]; return !p || (p.online === false && serverNow() - (p.lastSeen || 0) > GONE_MS); };
+const deadline = () => S.phase.startedAt + S.phase.duration * 1000;
+const eligible = () => {
+  const st = settings();
+  return Object.keys(S.players).filter(id => S.players[id].online !== false && (st.hostPlays || id !== S.meta.hostId));
+};
+
+/* чернетка поточного ходу — щоб пережити перезавантаження сторінки */
+function getDraft(id) { try { const d = JSON.parse(sessionStorage.getItem('wuphone.draft')); return d && d.id === id ? d.v : null; } catch (e) { return null; } }
+function setDraft(id, v) { try { sessionStorage.setItem('wuphone.draft', JSON.stringify({ id, v })); } catch (e) {} }
+function clearDraft() { try { sessionStorage.removeItem('wuphone.draft'); } catch (e) {} }
+
+/* =====================================================================
+   8. FIREBASE: КІМНАТИ, ПРИСУТНІСТЬ
+   ===================================================================== */
+async function init() {
+  $('#favicon').href = 'data:image/svg+xml,' + encodeURIComponent(FAVICON_SVG);
+  $('#hdrLogo').innerHTML = LOGO_SVG;
+  $('#offline').textContent = T.offline;
+  const mute = $('#mute');
+  const paintMute = () => { mute.textContent = S.muted ? '🔇' : '🔊'; mute.title = S.muted ? T.soundOff : T.soundOn; };
+  mute.onclick = () => { S.muted = !S.muted; LS.set('muted', S.muted); paintMute(); if (!S.muted) { unlockAudio(); beep(); } };
+  paintMute();
+  document.addEventListener('pointerdown', unlockAudio, { passive: true });
+  document.addEventListener('keydown', onKey);
+
+  if (typeof firebase === 'undefined' || JSON.stringify(FIREBASE_CONFIG).includes('PASTE_')) { S.boot = 'setup'; return render(); }
+  render();
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    TS = firebase.database.ServerValue.TIMESTAMP;
+    const cred = await firebase.auth().signInAnonymously();   // uid зберігається в браузері й переживає перезавантаження
+    S.uid = cred.user.uid;
+    LS.set('playerId', S.uid);
+  } catch (e) { console.error(e); S.boot = 'autherr'; return render(); }
+
+  db.ref('.info/serverTimeOffset').on('value', s => { S.offset = s.val() || 0; S.offsetReady = true; });
+  let offTimer;
+  db.ref('.info/connected').on('value', s => {
+    S.connected = !!s.val();
+    clearTimeout(offTimer);
+    if (S.connected) { $('#offline').hidden = true; if (S.joined) presence(); }
+    else offTimer = setTimeout(() => { $('#offline').hidden = false; }, 3000);
+  });
+
+  const code = (new URLSearchParams(location.search).get('room') || '').toUpperCase();
+  if (code) {
+    let exists = false;
+    if (/^[A-Z]{4}$/.test(code)) {
+      try { exists = (await db.ref('rooms/' + code + '/meta/hostId').once('value')).exists(); } catch (e) { console.error(e); }
+    }
+    if (exists) enterRoom(code);
+    else { toast(T.errNoRoom); history.replaceState(null, '', location.pathname); }
+  }
+  S.boot = 'ok';
+  render();
+  setInterval(tick, 250);
+}
+
+function enterRoom(code) {
+  S.room = code; S.loaded = {}; S.joined = false;
+  const base = db.ref('rooms/' + code);
+  refs = { base, meta: base.child('meta'), players: base.child('players'), phase: base.child('phase'),
+           chains: base.child('chains'), me: base.child('players/' + S.uid) };
+  const onErr = e => { console.error(e); toast(T.errGeneric); };
+  refs.meta.on('value', s => {
+    S.meta = s.val(); S.loaded.meta = true;
+    if (!S.meta) return leaveRoom(T.errNoRoom);
+    render();
+  }, onErr);
+  refs.players.on('value', s => {
+    S.players = s.val() || {}; S.loaded.players = true;
+    const here = !!S.players[S.uid];
+    if (here && !S.joined) { S.joined = true; presence(); }
+    else if (here && S.players[S.uid].online === false && S.connected) presence();   // напр. закрили другу вкладку
+    else if (!here && S.joined) return leaveRoom(T.kicked);
+    render();
+  }, onErr);
+  refs.phase.on('value', s => { S.phase = s.val() || { state: 'lobby' }; S.loaded.phase = true; render(); }, onErr);
+}
+
+function leaveRoom(msg) {
+  if (!S.room) return;
+  if (S.joined) { refs.me.child('online').onDisconnect().cancel(); refs.me.child('lastSeen').onDisconnect().cancel(); }
+  refs.meta.off(); refs.players.off(); refs.phase.off();
+  S.room = null; S.joined = false; S.meta = null; S.players = {}; S.phase = null; S.loaded = {};
+  history.replaceState(null, '', location.pathname);
+  if (msg) toast(msg);
+  render();
+}
+
+function presence() {
+  refs.me.child('online').onDisconnect().set(false);
+  refs.me.child('lastSeen').onDisconnect().set(TS);
+  refs.me.update({ online: true }).catch(() => {});
+}
+
+async function cleanupOldRooms() {
+  // простий клієнтський прибиральник: кімнати, старші за 24 години (правила дозволяють видаляти лише такі)
+  try {
+    const cutoff = serverNow() - DAY_MS - 5 * 60 * 1000;
+    const snap = await db.ref('roomIndex').orderByValue().endAt(cutoff).limitToFirst(25).once('value');
+    const codes = []; snap.forEach(ch => { codes.push(ch.key); });
+    for (const code of codes) {
+      await db.ref('rooms/' + code).remove();
+      await db.ref('roomIndex/' + code).remove();
+    }
+  } catch (e) { console.warn('cleanup skipped:', e && e.message); }
+}
+
+async function createRoom(profile) {
+  cleanupOldRooms();
+  for (let i = 0; i < 8; i++) {
+    const code = Array.from({ length: 4 }, () => rand(CODE_ABC)).join('');
+    try {
+      // правила дозволяють створити кімнату лише якщо такого коду ще немає
+      await db.ref('rooms/' + code).set({ meta: { hostId: S.uid, createdAt: TS, settings: DEFAULTS }, phase: { state: 'lobby' } });
+    } catch (e) { continue; }
+    db.ref('roomIndex/' + code).set(TS).catch(() => {});
+    history.replaceState(null, '', '?room=' + code);
+    enterRoom(code);
+    await joinRoom(profile);
+    return;
+  }
+  throw new Error('create failed');
+}
+
+function joinRoom(profile) {
+  return refs.me.set({ name: profile.name, avatar: profile.avatar, color: profile.color, online: true, joinedAt: TS });
+}
+
+/* =====================================================================
+   9. ЛОГІКА ГРИ
+   ===================================================================== */
+async function startGame() {
+  const ids = eligible();
+  if (ids.length < 2) return toast(T.needPlayers);
+  for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
+  const st = settings();
+  try {
+    await refs.chains.remove();
+    await refs.phase.set({ state: 'play', round: 0, rounds: Math.min(ids.length, st.maxRounds), order: ids, startedAt: TS, duration: st.writeSec });
+  } catch (e) { console.error(e); toast(T.errGeneric); }
+}
+
+// Перемикає фазу. Викликається ТІЛЬКИ на клієнті ведучого.
+async function hostAdvance() {
+  if (hostBusy) return;
+  hostBusy = true;
+  try {
+    const ph = S.phase, r = ph.round, ord = order(), n = ord.length, type = roundKind(r) === 'draw' ? 'draw' : 'text';
+    // заглушки для тих, хто не здав; якщо хід уже записано — правила відхилять запис, і це нормально
+    await Promise.all(ord.map((id, p) => isDone(id) ? null :
+      refs.chains.child(chainFor(p, r, n) + '/steps/' + r)
+        .set({ t: type, a: id, n: (S.players[id] || {}).name || '???', v: '', s: true }).catch(() => {})));
+    if (!S.phase || S.phase.state !== 'play' || S.phase.round !== r) return;
+    if (r + 1 >= ph.rounds) {
+      await refs.phase.update({ state: 'album', album: { c: 0, s: 0 }, done: null });
+    } else {
+      const st = settings();
+      await refs.phase.update({ round: r + 1, startedAt: TS, duration: roundKind(r + 1) === 'draw' ? st.drawSec : st.writeSec, done: null });
+    }
+  } catch (e) { console.error(e); }
+  finally { hostBusy = false; }
+}
+
+async function submit(auto) {
+  const ph = S.phase;
+  if (S.submitting || !work || !ph || ph.state !== 'play' || work.r !== ph.round || isDone(S.uid)) return;
+  const r = ph.round, p = myIdx(), n = order().length;
+  if (p < 0) return;
+  const step = { a: S.uid, n: me().name };
+  if (work.kind === 'draw') { step.t = 'draw'; step.v = work.pad.exportImage(); }
+  else {
+    let v = work.text().trim().slice(0, MAX_TEXT);
+    if (!v) {
+      if (!auto) return toast(T.emptyText);
+      v = work.kind === 'write' ? rand(PHRASES) : T.noWords;
+    }
+    step.t = 'text'; step.v = v;
+  }
+  S.submitting = true;
+  work.btn.disabled = true; work.btn.textContent = T.sending;
+  const doneRef = refs.phase.child('done/' + S.uid);
+  try {
+    await refs.chains.child(chainFor(p, r, n) + '/steps/' + r).set(step);
+    await doneRef.set(r);
+    clearDraft();
+  } catch (e) {
+    // відмова = хід уже записано раніше (напр. до перезавантаження сторінки) або раунд закінчився
+    if (S.phase && S.phase.state === 'play' && S.phase.round === r) doneRef.set(r).catch(() => {});
+    else if (!auto) toast(T.sendFail);
+  }
+  S.submitting = false;
+  if (work && work.r === r && work.btn) { work.btn.disabled = false; work.btn.textContent = T.done; }
+  render();
+}
+
+function tick() {
+  const ph = S.phase, timer = $('#timer'), bar = $('#bar');
+  const playing = !!(S.room && me() && ph && ph.state === 'play' && typeof ph.startedAt === 'number');
+  timer.hidden = bar.hidden = !playing;
+  if (!playing || !S.offsetReady) return;
+  const now = serverNow(), left = (deadline() - now) / 1000, sec = Math.max(0, Math.ceil(left));
+  timer.textContent = sec;
+  timer.classList.toggle('danger', sec <= 5);
+  bar.classList.toggle('danger', sec <= 5);
+  bar.firstElementChild.style.width = clamp(left / ph.duration * 100, 0, 100) + '%';
+
+  const beepKey = ph.round + ':' + ph.duration;
+  if (sec <= 5 && sec > 0 && S.beeped !== beepKey) { S.beeped = beepKey; beep(); }
+
+  // час вийшов — здаємо те, що є
+  if (left <= 0 && curKey === 'play:' + ph.round + ':work') submit(true);
+
+  // фази перемикає лише ведучий
+  if (isHost() && S.connected && !hostBusy) {
+    const ord = order();
+    const allIn = now - ph.startedAt > 1500 && ord.some(isDone) && ord.every(id => isDone(id) || isGone(id));
+    if (allIn || now >= deadline() + GRACE_MS) hostAdvance();
+  }
+}
+
+function albumNav(d) {
+  const ph = S.phase;
+  if (!isHost() || !ph || ph.state !== 'album') return;
+  const a = ph.album || { c: 0, s: 0 }, n = order().length, R = ph.rounds;
+  let c = a.c, s = a.s + d;
+  if (d === 'chain') { if (c >= n - 1) return; c++; s = 0; }
+  else if (s >= R) { if (c >= n - 1) return; c++; s = 0; }
+  else if (s < 0) { if (c <= 0) return; c--; s = R - 1; }
+  refs.phase.child('album').set({ c, s });
+}
+
+async function newGame(atEnd) {
+  if (!atEnd && !confirm(T.newGameConfirm)) return;
+  try {
+    await refs.phase.set({ state: 'lobby' });
+    await refs.chains.remove();
+  } catch (e) { console.error(e); toast(T.errGeneric); }
+}
+
+function onKey(e) {
+  if (!S.phase || S.phase.state !== 'album' || !isHost() || /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+  if (e.key === 'ArrowRight') { e.preventDefault(); albumNav(1); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); albumNav(-1); }
+}
+
+/* =====================================================================
+   10. МАЛЮВАЛКА
+   ===================================================================== */
+function createPad(onChange) {
+  const W = 800, H = 600, UNDO_MAX = 20;
+  const cv = h('canvas', { width: W, height: H });
+  const ctx = cv.getContext('2d', { willReadFrequently: true });
+  const st = { tool: 'brush', color: PALETTE[0], size: BRUSHES[1], undo: [] };
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+  ctx.lineCap = ctx.lineJoin = 'round';
+
+  const snap = () => { st.undo.push(ctx.getImageData(0, 0, W, H)); if (st.undo.length > UNDO_MAX) st.undo.shift(); };
+  // координати вказівника → координати полотна, хоч би якого розміру воно було на екрані
+  const pos = e => { const b = cv.getBoundingClientRect(); return [(e.clientX - b.left) * W / b.width, (e.clientY - b.top) * H / b.height]; };
+  let active = null, last = null;
+
+  cv.addEventListener('pointerdown', e => {
+    if (e.button > 0 || active !== null) return;
+    e.preventDefault();
+    const [x, y] = pos(e);
+    snap();
+    if (st.tool === 'fill') { floodFill(ctx, clamp(Math.floor(x), 0, W - 1), clamp(Math.floor(y), 0, H - 1), st.color); onChange(); return; }
+    active = e.pointerId; last = [x, y];
+    try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+    ctx.strokeStyle = ctx.fillStyle = st.tool === 'eraser' ? '#FFFFFF' : st.color;
+    ctx.lineWidth = st.tool === 'eraser' ? st.size * 1.8 : st.size;
+    ctx.beginPath(); ctx.arc(x, y, ctx.lineWidth / 2, 0, Math.PI * 2); ctx.fill();
+  });
+  cv.addEventListener('pointermove', e => {
+    if (e.pointerId !== active) return;
+    e.preventDefault();
+    const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [];
+    for (const ev of (evs.length ? evs : [e])) {
+      const [x, y] = pos(ev);
+      ctx.beginPath(); ctx.moveTo(last[0], last[1]); ctx.lineTo(x, y); ctx.stroke();
+      last = [x, y];
+    }
+  });
+  const end = e => { if (e.pointerId !== active) return; active = null; onChange(); };
+  cv.addEventListener('pointerup', end);
+  cv.addEventListener('pointercancel', end);
+
+  // --- панель інструментів ---
+  const swatches = PALETTE.map(c => h('button', { type: 'button', class: 'sw', title: c, style: { background: c },
+    onclick: () => { st.color = c; if (st.tool === 'eraser') st.tool = 'brush'; paint(); } }));
+  const sizes = BRUSHES.map(s => h('button', { type: 'button', class: 'tb', title: s + ' px',
+    onclick: () => { st.size = s; paint(); } }, h('i', { style: { width: Math.max(5, s * 0.8) + 'px', height: Math.max(5, s * 0.8) + 'px' } })));
+  const toolBtn = (id, icon, fn) => h('button', { type: 'button', class: 'tb', title: T.tools[id], 'aria-label': T.tools[id], 'data-tool': id, onclick: fn }, icon);
+  const toolBtns = [
+    toolBtn('brush', '✏️', () => { st.tool = 'brush'; paint(); }),
+    toolBtn('eraser', '🧽', () => { st.tool = 'eraser'; paint(); }),
+    toolBtn('fill', '🪣', () => { st.tool = 'fill'; paint(); }),
+    toolBtn('undo', '↩️', () => { if (st.undo.length) { ctx.putImageData(st.undo.pop(), 0, 0); onChange(); } }),
+    toolBtn('clear', '🗑️', () => { snap(); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); onChange(); })
+  ];
+  function paint() {
+    swatches.forEach((b, i) => b.classList.toggle('on', PALETTE[i] === st.color && st.tool !== 'eraser'));
+    sizes.forEach((b, i) => b.classList.toggle('on', BRUSHES[i] === st.size));
+    toolBtns.forEach(b => b.classList.toggle('on', b.dataset.tool === st.tool));
+  }
+  paint();
+
+  return {
+    canvas: cv,
+    tools: [h('div', { class: 'pal' }, swatches), h('div', { class: 'trow' }, sizes), h('div', { class: 'trow five' }, toolBtns)],
+    load(url) { const im = new Image(); im.onload = () => ctx.drawImage(im, 0, 0, W, H); im.src = url; },
+    raw: () => cv.toDataURL('image/png'),
+    // стискаємо до ~640×480 WebP (або JPEG, якщо браузер не вміє WebP), ціль — до 50 КБ
+    exportImage() {
+      const out = document.createElement('canvas'), o = out.getContext('2d');
+      let best = '';
+      for (const [w, hh] of [[IMG_W, IMG_H], [480, 360]]) {
+        out.width = w; out.height = hh;
+        o.fillStyle = '#fff'; o.fillRect(0, 0, w, hh); o.drawImage(cv, 0, 0, w, hh);
+        for (const fmt of ['image/webp', 'image/jpeg']) {
+          for (const q of [0.8, 0.6, 0.45, 0.3, 0.2]) {
+            const url = out.toDataURL(fmt, q);
+            if (!url.startsWith('data:' + fmt)) break;          // формат не підтримується
+            if (url.length <= IMG_MAX_CHARS) return url;
+            if (!best || url.length < best.length) best = url;
+          }
+        }
+      }
+      return best;
+    }
+  };
+}
+
+function floodFill(ctx, x0, y0, hex) {
+  const w = ctx.canvas.width, hgt = ctx.canvas.height, img = ctx.getImageData(0, 0, w, hgt), d = img.data;
+  const fr = parseInt(hex.slice(1, 3), 16), fg = parseInt(hex.slice(3, 5), 16), fb = parseInt(hex.slice(5, 7), 16);
+  const i0 = (y0 * w + x0) * 4, r0 = d[i0], g0 = d[i0 + 1], b0 = d[i0 + 2], TOL = 70;
+  if (Math.abs(r0 - fr) + Math.abs(g0 - fg) + Math.abs(b0 - fb) < 6) return;
+  const seen = new Uint8Array(w * hgt);
+  const ok = (x, y) => { const p = y * w + x; if (seen[p]) return false; const i = p * 4; return Math.abs(d[i] - r0) + Math.abs(d[i + 1] - g0) + Math.abs(d[i + 2] - b0) <= TOL; };
+  const stack = [x0, y0];
+  while (stack.length) {
+    const y = stack.pop(); let x = stack.pop();
+    if (!ok(x, y)) continue;
+    while (x > 0 && ok(x - 1, y)) x--;
+    let up = false, dn = false;
+    for (; x < w && ok(x, y); x++) {
+      const p = y * w + x, i = p * 4;
+      seen[p] = 1; d[i] = fr; d[i + 1] = fg; d[i + 2] = fb; d[i + 3] = 255;
+      if (y > 0) { const o = ok(x, y - 1); if (o && !up) stack.push(x, y - 1); up = o; }
+      if (y < hgt - 1) { const o = ok(x, y + 1); if (o && !dn) stack.push(x, y + 1); dn = o; }
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+/* =====================================================================
+   11. ЕКРАНИ
+   ===================================================================== */
+function viewKey() {
+  if (S.boot !== 'ok') return S.boot;
+  if (!S.room) return 'home';
+  if (!(S.loaded.meta && S.loaded.players && S.loaded.phase)) return 'loading';
+  if (!me()) return 'join';
+  const ph = S.phase;
+  if (ph.state === 'play') return 'play:' + ph.round + ':' + (myIdx() < 0 ? 'watch' : isDone(S.uid) ? 'wait' : 'work');
+  if (ph.state === 'album') return 'album';
+  return 'lobby';
+}
+
+function render() {
+  const key = viewKey();
+  if (key !== curKey) {
+    curKey = key; work = null;
+    const root = $('#app'); root.replaceChildren(); window.scrollTo(0, 0);
+    const [a, , mode] = key.split(':');
+    if (a === 'setup') mountMessage(root, T.setupTitle, T.setupText);
+    else if (a === 'autherr') mountMessage(root, T.errAuthTitle, T.errAuth);
+    else if (a === 'loading') mountMessage(root, T.loading, '');
+    else if (a === 'home') mountProfile(root, false);
+    else if (a === 'join') mountProfile(root, true);
+    else if (a === 'lobby') mountLobby(root);
+    else if (a === 'play') (mode === 'work' ? mountWork : mountWait)(root, mode);
+    else if (a === 'album') mountAlbum(root);
+  }
+  refreshHeader();
+  if (key === 'lobby') refreshLobby();
+  else if (key.startsWith('play')) refreshStatus();
+  else if (key === 'album') refreshAlbum();
+}
+
+function refreshHeader() {
+  const ph = S.phase, on = S.boot === 'ok' && !!(S.room && me() && ph && ph.state !== 'lobby');
+  $('#hdr').hidden = !on;
+  if (!on) { $('#timer').hidden = $('#bar').hidden = true; return; }
+  $('#hdrRoom').textContent = S.room;
+  const b = $('#hdrPhase');
+  if (ph.state === 'play') {
+    const k = roundKind(ph.round);
+    b.textContent = T.round(ph.round + 1, ph.rounds) + ' · ' + T.kind[k];
+    b.className = 'badge ' + (k === 'draw' ? 'bbg' : 'gbg');
+  } else { b.textContent = T.albumTitle; b.className = 'badge'; }
+}
+
+function mountMessage(root, title, text) {
+  root.append(h('div', { class: 'hero' }, logoEl('lg wobble'), h('h1', {}, T.appName)),
+    h('div', { class: 'card narrow center tilt-l' }, h('h2', {}, title), text && h('p', {}, text)));
+}
+
+/* ---------- старт / вхід: ім’я й аватар ---------- */
+function mountProfile(root, joining) {
+  const prof = LS.get('profile', {});
+  let avatar = EMOJIS.includes(prof.avatar) ? prof.avatar : rand(EMOJIS);
+  let color = AVATAR_COLORS.includes(prof.color) ? prof.color : rand(AVATAR_COLORS);
+  const name = h('input', { class: 'inp', maxLength: MAX_NAME, placeholder: T.namePh, value: prof.name || '', autocomplete: 'off', 'aria-label': T.yourName });
+  const preview = h('span', { class: 'ava xl' });
+  const emo = EMOJIS.map(e => h('button', { type: 'button', class: 'pk', onclick: () => { avatar = e; upd(); } }, e));
+  const col = AVATAR_COLORS.map(c => h('button', { type: 'button', class: 'pk col', title: c, style: { background: c }, onclick: () => { color = c; upd(); } }));
+  function upd() {
+    preview.textContent = avatar; preview.style.background = color;
+    emo.forEach((b, i) => b.classList.toggle('on', EMOJIS[i] === avatar));
+    col.forEach((b, i) => { b.classList.toggle('on', AVATAR_COLORS[i] === color); b.style.background = AVATAR_COLORS[i]; });
+  }
+  upd();
+  const go = h('button', { type: 'button', class: 'btn big ' + (joining ? 'p' : ''), onclick: async () => {
+    const n = name.value.trim().slice(0, MAX_NAME);
+    if (!n) { toast(T.errName); name.focus(); return; }
+    const p = { name: n, avatar, color };
+    LS.set('profile', p);
+    go.disabled = true;
+    try { await (joining ? joinRoom(p) : createRoom(p)); }
+    catch (e) { console.error(e); toast(joining ? T.errGeneric : T.errCreate); }
+    go.disabled = false;
+  } }, joining ? T.join : T.createRoom);
+  name.addEventListener('keydown', e => { if (e.key === 'Enter') go.click(); });
+
+  root.append(
+    h('div', { class: 'hero' }, logoEl('lg wobble'), h('h1', {}, T.appName),
+      h('div', { class: 'tag tilt-r' }, joining ? T.roomLabel(S.room) : T.tagline)),
+    h('div', { class: 'card narrow stack' },
+      h('div', { class: 'row', style: { flexWrap: 'nowrap' } }, preview,
+        h('div', { class: 'grow' }, h('div', { class: 'lbl', style: { marginBottom: '6px' } }, T.yourName), name)),
+      h('div', {}, h('div', { class: 'lbl', style: { marginBottom: '8px' } }, T.pickAvatar), h('div', { class: 'pick' }, emo)),
+      h('div', {}, h('div', { class: 'lbl', style: { marginBottom: '8px' } }, T.pickColor), h('div', { class: 'pick' }, col)),
+      h('div', { class: 'center' }, go)
+    )
+  );
+  if (!joining) {
+    const code = h('input', { class: 'inp disp', maxLength: 4, placeholder: T.codePh, autocomplete: 'off', autocapitalize: 'characters',
+      style: { width: '150px', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '.1em' } });
+    const enter = () => {
+      const c = code.value.trim().toUpperCase();
+      if (!/^[A-Z]{4}$/.test(c)) return toast(T.errCode);
+      location.search = '?room=' + c;
+    };
+    code.addEventListener('keydown', e => { if (e.key === 'Enter') enter(); });
+    root.append(h('div', { class: 'narrow center', style: { marginTop: '30px' } },
+      h('div', { class: 'lbl', style: { marginBottom: '10px' } }, T.orJoin),
+      h('div', { class: 'row', style: { justifyContent: 'center' } }, code, h('button', { type: 'button', class: 'btn w', onclick: enter }, T.enter))));
+  }
+}
+
+/* ---------- лобі ---------- */
+function mountLobby(root) {
+  clearDraft();
+  S.album = { cache: {}, loading: null, key: null, shown: null };
+  S.beeped = null; lobbyCtlKey = null;
+  const link = location.origin + location.pathname + '?room=' + S.room;
+  root.append(
+    h('div', { class: 'hero' }, logoEl('lg wobble'), h('h1', {}, T.appName)),
+    h('div', { class: 'grid2' },
+      h('div', { class: 'stack', style: { gap: '26px' } },
+        h('div', { class: 'card ybg tilt-l' },
+          h('div', { class: 'lbl' }, T.roomCode),
+          h('div', { class: 'code disp' }, S.room),
+          h('div', { class: 'link' }, link),
+          h('button', { type: 'button', class: 'btn w', onclick: () => copyText(link) }, T.copyLink)),
+        h('div', { class: 'card tilt-r', id: 'lobbyCtl' })),
+      h('div', { class: 'card' }, h('h3', { id: 'plTitle' }), h('div', { class: 'plist', id: 'plList' }))
+    )
+  );
+}
+
+function refreshLobby() {
+  const ids = Object.keys(S.players).sort((a, b) => (S.players[a].joinedAt || 0) - (S.players[b].joinedAt || 0));
+  const host = isHost();
+  $('#plTitle').textContent = T.players(ids.length);
+  $('#plList').replaceChildren(...ids.map(id => {
+    const p = S.players[id];
+    return h('div', { class: 'pl' + (p.online === false ? ' off' : '') }, avatarEl(p), h('b', {}, p.name),
+      id === S.meta.hostId && h('span', { class: 'tagm' }, T.host),
+      id === S.uid && h('span', { class: 'tagm', style: { background: '#fff' } }, T.you),
+      h('span', { class: 'grow' }),
+      host && id !== S.uid && h('button', { type: 'button', class: 'btn sm p', title: T.kick, 'aria-label': T.kick,
+        onclick: () => { if (confirm(T.kickConfirm(p.name))) refs.players.child(id).remove(); } }, '✕'));
+  }));
+
+  const ctl = $('#lobbyCtl'), st = settings(), n = eligible().length;
+  if (lobbyCtlKey !== (host ? 'host' : 'guest')) {
+    lobbyCtlKey = host ? 'host' : 'guest';
+    if (host) {
+      const num = k => h('input', { type: 'number', class: 'inp num', id: 'set_' + k, min: LIMITS[k][0], max: LIMITS[k][1], inputMode: 'numeric',
+        onchange: e => { const v = clamp(parseInt(e.target.value, 10) || DEFAULTS[k], LIMITS[k][0], LIMITS[k][1]); e.target.value = v; refs.meta.child('settings/' + k).set(v); } });
+      ctl.replaceChildren(
+        h('h3', {}, T.settings),
+        h('label', { class: 'setrow' }, T.writeSec, num('writeSec')),
+        h('label', { class: 'setrow' }, T.drawSec, num('drawSec')),
+        h('label', { class: 'setrow' }, T.maxRounds, num('maxRounds')),
+        h('label', { class: 'setrow' }, T.hostPlays, h('input', { type: 'checkbox', class: 'chk', id: 'set_hostPlays',
+          onchange: e => refs.meta.child('settings/hostPlays').set(e.target.checked) })),
+        h('div', { class: 'hint', id: 'lobbyInfo', style: { margin: '12px 0' } }),
+        h('button', { type: 'button', class: 'btn big p', id: 'startBtn', style: { width: '100%' }, onclick: startGame }, T.start));
+    } else {
+      ctl.replaceChildren(h('h3', {}, T.waitHost), h('div', { class: 'hint', id: 'lobbyInfo', style: { marginTop: '10px' } }));
+    }
+  }
+  if (host) {
+    for (const k of ['writeSec', 'drawSec', 'maxRounds']) { const el = $('#set_' + k); if (document.activeElement !== el) el.value = st[k]; }
+    $('#set_hostPlays').checked = !!st.hostPlays;
+    $('#startBtn').disabled = n < 2;
+    $('#lobbyInfo').textContent = n < 2 ? T.needPlayers : T.roundsInfo(n, Math.min(n, st.maxRounds));
+  } else {
+    $('#lobbyInfo').textContent = T.settingsInfo(st);
+  }
+}
+
+/* ---------- раунд: пишемо / малюємо / описуємо ---------- */
+function mountWork(root) {
+  const ph = S.phase, r = ph.round, kind = roundKind(r), key = curKey, draftId = S.room + ':' + r, draft = getDraft(draftId);
+  const btn = h('button', { type: 'button', class: 'btn big p', onclick: () => submit(false) }, T.done);
+  const strip = h('div', { id: 'stGrid' });
+  work = { kind, r, btn };
+  let promptEl = null;
+
+  if (kind === 'write') {
+    const ta = h('textarea', { class: 'inp area', maxLength: MAX_TEXT, placeholder: T.writePh, value: draft || '', 'aria-label': T.writeTitle,
+      oninput: () => setDraft(draftId, ta.value) });
+    ta.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submit(false); } });
+    work.text = () => ta.value;
+    root.append(h('div', { class: 'work narrow' },
+      h('div', { class: 'prompt ybg tilt-l' }, h('h2', {}, T.writeTitle), h('div', { class: 'hint', style: { marginTop: '6px' } }, T.writeHint)),
+      ta,
+      h('div', { class: 'row' },
+        h('button', { type: 'button', class: 'btn w', onclick: () => { ta.value = rand(PHRASES); setDraft(draftId, ta.value); } }, '🎲 ' + T.noIdeas),
+        h('span', { class: 'grow' }), btn),
+      strip));
+  } else if (kind === 'draw') {
+    let saveTimer;
+    const pad = createPad(() => { clearTimeout(saveTimer); saveTimer = setTimeout(() => { if (work && work.pad === pad) setDraft(draftId, pad.raw()); }, 600); });
+    if (okImg(draft)) pad.load(draft);
+    work.pad = pad;
+    promptEl = h('div', { class: 'ptext' }, T.loading);
+    btn.style.width = '100%';
+    root.append(h('div', { class: 'work' },
+      h('div', { class: 'prompt bbg tilt-l' }, h('div', { class: 'lbl' }, T.drawTitle), promptEl),
+      h('div', { class: 'draw' },
+        h('div', { class: 'padwrap' }, pad.canvas),
+        h('div', { class: 'tools' }, pad.tools, btn)),
+      strip));
+  } else {
+    const inp = h('input', { class: 'inp', maxLength: MAX_TEXT, placeholder: T.describePh, value: draft || '', autocomplete: 'off', 'aria-label': T.describeTitle,
+      oninput: () => setDraft(draftId, inp.value) });
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(false); });
+    work.text = () => inp.value;
+    promptEl = h('div', { class: 'padwrap view' }, h('div', { class: 'ptext center', style: { padding: '40px 16px', lineHeight: '1.3' } }, T.loading));
+    root.append(h('div', { class: 'work narrow', style: { maxWidth: '760px' } },
+      h('div', { class: 'prompt gbg tilt-r' }, h('h2', {}, T.describeTitle)),
+      promptEl,
+      h('div', { class: 'row' }, h('div', { class: 'grow', style: { flexBasis: '260px' } }, inp), btn),
+      strip));
+  }
+
+  if (r > 0) {
+    const fill = step => {
+      if (curKey !== key) return;
+      const skipped = !step || step.s;
+      if (kind === 'draw') promptEl.textContent = skipped ? T.skipped : step.v;
+      else if (!skipped && okImg(step.v)) promptEl.replaceChildren(h('img', { src: step.v, alt: '' }));
+      else promptEl.firstChild.textContent = T.skipped;
+    };
+    refs.chains.child(chainFor(myIdx(), r, order().length) + '/steps/' + (r - 1)).once('value')
+      .then(s => fill(s.val())).catch(e => { console.error(e); fill(null); });
+  }
+}
+
+function mountWait(root, mode) {
+  const host = isHost();
+  const title = mode === 'wait' ? T.waitTitle : host ? T.hostWatchTitle : T.watchTitle;
+  const text = mode === 'wait' ? '' : host ? T.hostWatchText : T.watchText;
+  root.append(h('div', { class: 'waitbox' },
+    h('div', { class: 'prompt tilt-l ' + (mode === 'wait' ? 'gbg' : 'ybg') }, h('h2', {}, title), text && h('div', { class: 'hint', style: { marginTop: '6px' } }, text)),
+    h('div', { id: 'stGrid', 'data-big': '1' }),
+    host && h('button', { type: 'button', class: 'btn w', onclick: () => { if (confirm(T.forceConfirm)) hostAdvance(); } }, T.forceNext)));
+}
+
+function refreshStatus() {
+  const g = $('#stGrid'); if (!g) return;
+  const ord = order(), big = g.dataset.big === '1';
+  g.replaceChildren(
+    h('div', { class: 'stcount' }, T.submitted(ord.filter(isDone).length, ord.length)),
+    h('div', { class: 'status' + (big ? ' big' : '') }, ord.map(id => {
+      const p = S.players[id], d = isDone(id);
+      return h('div', { class: 'st' + (d ? ' ok' : '') + (!p || p.online === false ? ' off' : ''), title: p ? p.name : '' },
+        avatarEl(p), h('span', { class: 'mark' }, d ? '✓' : '…'), big && h('span', { class: 'nm' }, p ? p.name : '—'));
+    })));
+}
+
+/* ---------- альбом ---------- */
+function mountAlbum(root) {
+  S.album.key = null;
+  root.append(h('div', { class: 'album' },
+    h('div', { class: 'alhead' }, h('h2', { id: 'alTitle' }, T.albumTitle), h('div', { class: 'sub', id: 'alSub' })),
+    h('div', { id: 'alList' }),
+    h('div', { class: 'alctl', id: 'alCtl' })));
+}
+
+function stepCard(st, i, pop) {
+  st = st || { s: true, t: i % 2 ? 'draw' : 'text', n: '—' };
+  const isImg = st.t === 'draw' && !st.s && okImg(st.v);
+  return h('div', { class: 'step' + (pop ? ' pop' : '') },
+    h('div', { class: 'who' }, avatarEl(S.players[st.a]), h('b', {}, st.n), h('span', {}, st.t === 'draw' ? T.drew : T.wrote)),
+    isImg ? h('img', { class: 'shot', src: st.v, alt: '' })
+          : h('div', { class: 'say ' + (st.t === 'draw' ? 'bbg' : i ? 'gbg' : 'ybg') + (i % 4 ? ' tilt-r' : ' tilt-l') }, st.s ? T.skipped : st.v));
+}
+
+function refreshAlbum() {
+  const ph = S.phase, A = S.album, a = ph.album || { c: 0, s: 0 }, n = order().length, R = ph.rounds, host = isHost();
+  const steps = A.cache[a.c];
+  if (!steps && A.loading !== a.c) {
+    A.loading = a.c;
+    const c = a.c;
+    refs.chains.child(c + '/steps').once('value').then(s => {
+      const arr = []; s.forEach(ch => { arr[+ch.key] = ch.val(); });
+      A.cache[c] = arr; if (A.loading === c) A.loading = null;
+      render();
+    }).catch(e => { console.error(e); if (A.loading === c) A.loading = null; });
+  }
+  const key = [a.c, a.s, !!steps, host].join(':');
+  if (key === A.key) return;
+  A.key = key;
+  const list = $('#alList'), atEnd = a.c >= n - 1 && a.s >= R - 1, full = a.s >= R - 1;
+  $('#alTitle').textContent = T.chainOf(a.c + 1, n, steps && steps[0] ? steps[0].n : '…');
+  $('#alSub').textContent = T.stepOf(a.s + 1, R) + (atEnd ? ' · ' + T.theEnd : '');
+  if (!steps) list.replaceChildren(h('div', { class: 'center hint' }, T.loading));
+  else {
+    const fresh = !A.shown || A.shown.c !== a.c || a.s > A.shown.s;
+    list.replaceChildren(...Array.from({ length: a.s + 1 }, (_, i) => stepCard(steps[i], i, fresh && i === a.s)));
+    A.shown = { c: a.c, s: a.s };
+    const lastEl = list.lastElementChild;
+    if (a.s === 0) window.scrollTo(0, 0);
+    else if (lastEl) lastEl.scrollIntoView({ block: 'center' });
+  }
+  const dl = h('button', { type: 'button', class: 'btn sm w', disabled: !full || !steps, onclick: () => downloadChain(a.c) }, T.download);
+  $('#alCtl').replaceChildren(...(host ? [
+    h('button', { type: 'button', class: 'btn big w', disabled: a.c === 0 && a.s === 0, onclick: () => albumNav(-1) }, T.prev),
+    h('button', { type: 'button', class: 'btn big', disabled: atEnd, onclick: () => albumNav(1) }, T.next),
+    h('button', { type: 'button', class: 'btn sm b', disabled: a.c >= n - 1, onclick: () => albumNav('chain') }, T.nextChain),
+    dl,
+    h('button', { type: 'button', class: 'btn ' + (atEnd ? 'big p' : 'sm w'), onclick: () => newGame(atEnd) }, T.newGame)
+  ] : [h('span', { class: 'hint', style: { fontWeight: 800 } }, T.hostFlips), dl]));
+}
+
+/* ---------- PNG ланцюжка з логотипом ---------- */
+function drawLogo(ctx, x, y, size) {
+  const k = size / 100;
+  ctx.save(); ctx.translate(x, y); ctx.scale(k, k);
+  ctx.fillStyle = C.k; ctx.beginPath(); ctx.arc(56, 56, 48, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = C.y; ctx.beginPath(); ctx.arc(50, 50, 48, 0, Math.PI * 2); ctx.fill();
+  ctx.lineWidth = 3 / k; ctx.strokeStyle = C.k; ctx.stroke();
+  ctx.translate(50, 50); ctx.scale(0.92, 0.92); ctx.translate(-50, -50);
+  ctx.fillStyle = C.k; ctx.fill(new Path2D(LOGO_PATH));
+  ctx.restore();
+}
+function wrapText(ctx, text, maxW) {
+  const lines = []; let line = '';
+  for (const word of String(text).split(/\s+/)) {
+    let w = word;
+    while (ctx.measureText(w).width > maxW) {            // дуже довге слово ріжемо посимвольно
+      let i = w.length; while (i > 1 && ctx.measureText(w.slice(0, i)).width > maxW) i--;
+      if (line) { lines.push(line); line = ''; }
+      lines.push(w.slice(0, i)); w = w.slice(i);
+    }
+    const t = line ? line + ' ' + w : w;
+    if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; } else line = t;
+  }
+  if (line) lines.push(line);
+  return lines.length ? lines : [''];
+}
+const loadImg = src => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
+
+async function downloadChain(c) {
+  const steps = S.album.cache[c]; if (!steps) return;
+  const R = S.phase.rounds, W = 760, P = 40, IW = W - P * 2, LH = 34;
+  const F_TEXT = '800 24px Manrope, sans-serif', F_LBL = '700 18px Manrope, sans-serif', F_TITLE = '900 34px Unbounded, "Arial Black", sans-serif';
+  try { await Promise.all([F_TEXT, F_LBL, F_TITLE].map(f => document.fonts.load(f, 'Жж'))); } catch (e) {}
+  const imgs = await Promise.all(Array.from({ length: R }, (_, i) => {
+    const st = steps[i];
+    return st && st.t === 'draw' && !st.s && okImg(st.v) ? loadImg(st.v).catch(() => null) : null;
+  }));
+  const cv = document.createElement('canvas'), x = cv.getContext('2d');
+  x.font = F_TEXT;
+  const blocks = []; let y = P + 84 + 30;
+  for (let i = 0; i < R; i++) {
+    const st = steps[i] || { s: true, t: i % 2 ? 'draw' : 'text', n: '—' };
+    const b = { st, y, img: imgs[i] };
+    if (b.img) b.h = IW * 3 / 4;
+    else { b.lines = wrapText(x, st.s ? T.skipped : st.v, IW - 48); b.h = b.lines.length * LH + 36; }
+    blocks.push(b); y += 30 + b.h + 30;
+  }
+  cv.width = W; cv.height = y + 40;
+  x.fillStyle = C.bg; x.fillRect(0, 0, W, cv.height);
+  x.textBaseline = 'top';
+  drawLogo(x, P, P, 78);
+  x.fillStyle = C.k; x.font = F_TITLE; x.fillText(T.appName, P + 104, P + 8);
+  x.font = F_LBL; x.fillText(T.pngChain(steps[0] ? steps[0].n : '—'), P + 104, P + 52);
+  blocks.forEach((b, i) => {
+    const top = b.y + 30;
+    x.fillStyle = C.k; x.font = F_LBL;
+    x.fillText(`${i + 1}. ${b.st.n} ${b.st.t === 'draw' ? T.drew : T.wrote}:`, P, b.y);
+    x.fillRect(P + 5, top + 5, IW, b.h);                                   // жорстка тінь
+    x.fillStyle = b.img ? '#fff' : b.st.t === 'draw' ? C.b : i ? C.g : C.y;
+    x.fillRect(P, top, IW, b.h);
+    if (b.img) x.drawImage(b.img, P, top, IW, b.h);
+    else { x.fillStyle = C.k; x.font = F_TEXT; b.lines.forEach((l, j) => x.fillText(l, P + 24, top + 20 + j * LH)); }
+    x.lineWidth = 3; x.strokeStyle = C.k; x.strokeRect(P, top, IW, b.h);
+  });
+  x.fillStyle = C.k; x.font = F_LBL; x.fillText(T.pngFooter, P, cv.height - 46);
+  cv.toBlob(blob => {
+    if (!blob) return toast(T.errGeneric);
+    const url = URL.createObjectURL(blob);
+    const a = h('a', { href: url, download: `wu-phone-${S.room}-${c + 1}.png` });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }, 'image/png');
+}
+
+init();
+</script>
+</body>
+</html>
