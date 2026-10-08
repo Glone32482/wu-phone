@@ -18,8 +18,11 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0;background:var(--bg);color:var(--k)}
-/* фон сторінки: ледь помітні дудли; саме полотно для малювання лишається чисто білим */
-body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280' fill='none' stroke='%23111' stroke-opacity='.08' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 44q9-14 18 0t18 0 18 0'/%3E%3Ccircle cx='214' cy='46' r='14'/%3E%3Cpath d='M128 16l7 15 16 2-12 11 3 16-14-8-14 8 3-16-12-11 16-2z'/%3E%3Cpath d='M34 160h24M46 148v24'/%3E%3Cpath d='M158 122l15 26h-30z'/%3E%3Cpath d='M232 176l-20 20m0-20l20 20'/%3E%3Crect x='92' y='196' width='26' height='26' rx='3' transform='rotate%2812 105 209%29'/%3E%3Cpath d='M16 244l12-12 12 12 12-12 12 12'/%3E%3Cpath d='M176 240a13 13 0 0 0 26 0'/%3E%3Cpath d='M88 96l22-8-8 22z'/%3E%3Ccircle cx='252' cy='112' r='7' fill='%23F4C93F' fill-opacity='.55' stroke='none'/%3E%3Ccircle cx='70' cy='108' r='6' fill='%23E0506E' fill-opacity='.3' stroke='none'/%3E%3Ccircle cx='150' cy='212' r='6' fill='%237EC8E3' fill-opacity='.5' stroke='none'/%3E%3Ccircle cx='24' cy='98' r='5' fill='%23A8E06A' fill-opacity='.6' stroke='none'/%3E%3C/svg%3E");background-size:280px 280px}
+/* фон сторінки: сітка з крапок + великі фігури по краях (#deco); полотно для малювання лишається чисто білим */
+body{background-image:radial-gradient(rgba(17,17,17,.14) 1.5px,transparent 1.7px);background-size:26px 26px}
+#deco{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#deco svg{position:absolute;width:var(--s);height:var(--s);overflow:visible}
+@media(max-width:760px){#deco .dx{display:none}#deco svg{opacity:.8}}
 body{font:500 18px/1.4 Manrope,system-ui,sans-serif;min-height:100dvh;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
 h1,h2,h3,.disp{font-family:Unbounded,"Arial Black",sans-serif;font-weight:900;line-height:1.1;margin:0}
 h1{font-size:clamp(34px,7vw,64px)} h2{font-size:clamp(22px,4vw,34px)} h3{font-size:18px}
@@ -69,7 +72,7 @@ h1{font-size:clamp(34px,7vw,64px)} h2{font-size:clamp(22px,4vw,34px)} h3{font-si
 #bar.danger i{background:var(--p)}
 @media(max-width:560px){#hdr .title{display:none}#hdr{gap:8px;padding:6px 10px}.timer{font-size:22px;min-width:62px}.chip,.badge{font-size:12px;padding:7px 8px}#hdr .chip{display:none}}
 
-#app{max-width:1120px;margin:0 auto;padding:18px 16px 40px}
+#app{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:18px 16px 40px}
 .narrow{max-width:680px;margin:0 auto}
 .stack{display:flex;flex-direction:column;gap:18px}
 .hero{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;margin:14px 0 26px}
@@ -176,6 +179,16 @@ h1{font-size:clamp(34px,7vw,64px)} h2{font-size:clamp(22px,4vw,34px)} h3{font-si
 </style>
 </head>
 <body>
+<div id="deco" aria-hidden="true">
+  <svg viewBox="0 0 110 110" style="--s:clamp(84px,12vw,170px);left:2.5%;top:13%;transform:rotate(-8deg)"><g transform="translate(6 6)" fill="#111"><polygon points="50.0,4.0 57.8,21.0 73.0,10.2 71.2,28.8 89.8,27.0 79.0,42.2 96.0,50.0 79.0,57.8 89.8,73.0 71.2,71.2 73.0,89.8 57.8,79.0 50.0,96.0 42.2,79.0 27.0,89.8 28.8,71.2 10.2,73.0 21.0,57.8 4.0,50.0 21.0,42.2 10.2,27.0 28.8,28.8 27.0,10.2 42.2,21.0"/></g><g fill="#F4C93F" stroke="#111" stroke-width="3.5" stroke-linejoin="round"><polygon points="50.0,4.0 57.8,21.0 73.0,10.2 71.2,28.8 89.8,27.0 79.0,42.2 96.0,50.0 79.0,57.8 89.8,73.0 71.2,71.2 73.0,89.8 57.8,79.0 50.0,96.0 42.2,79.0 27.0,89.8 28.8,71.2 10.2,73.0 21.0,57.8 4.0,50.0 21.0,42.2 10.2,27.0 28.8,28.8 27.0,10.2 42.2,21.0"/></g></svg>
+  <svg viewBox="0 0 110 110" style="--s:clamp(60px,8vw,120px);right:4%;top:16%"><g transform="translate(6 6)" fill="#111"><circle cx="50" cy="50" r="44"/></g><g fill="#E0506E" stroke="#111" stroke-width="3.5" stroke-linejoin="round"><circle cx="50" cy="50" r="44"/></g></svg>
+  <svg viewBox="0 0 110 110" class="dx" style="--s:clamp(90px,12vw,170px);left:5%;top:47%;transform:rotate(-10deg)"><g fill="none" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(6 6)" stroke="#111" stroke-width="19"><polyline points="6,68 28,34 50,68 72,34 94,68"/></g><g stroke="#111" stroke-width="19"><polyline points="6,68 28,34 50,68 72,34 94,68"/></g><g stroke="#7EC8E3" stroke-width="12"><polyline points="6,68 28,34 50,68 72,34 94,68"/></g></g></svg>
+  <svg viewBox="0 0 110 110" class="dx" style="--s:clamp(70px,10vw,140px);right:7%;top:46%;transform:rotate(14deg)"><g transform="translate(6 6)" fill="#111"><polygon points="50,6 96,90 4,90"/></g><g fill="#F4C93F" stroke="#111" stroke-width="3.5" stroke-linejoin="round"><polygon points="50,6 96,90 4,90"/></g></svg>
+  <svg viewBox="0 0 110 110" style="--s:clamp(96px,14vw,200px);left:-1.5%;bottom:5%;transform:rotate(16deg)"><g transform="translate(6 6)" fill="#111"><path d="M4 62A46 46 0 0 1 96 62Z"/></g><g fill="#A8E06A" stroke="#111" stroke-width="3.5" stroke-linejoin="round"><path d="M4 62A46 46 0 0 1 96 62Z"/></g></svg>
+  <svg viewBox="0 0 110 110" style="--s:clamp(70px,9vw,130px);right:2.5%;bottom:8%;transform:rotate(-12deg)"><g transform="translate(6 6)" fill="#111"><polygon points="36,4 64,4 64,36 96,36 96,64 64,64 64,96 36,96 36,64 4,64 4,36 36,36"/></g><g fill="#7EC8E3" stroke="#111" stroke-width="3.5" stroke-linejoin="round"><polygon points="36,4 64,4 64,36 96,36 96,64 64,64 64,96 36,96 36,64 4,64 4,36 36,36"/></g></svg>
+  <svg viewBox="0 0 110 110" class="dx" style="--s:clamp(60px,7vw,100px);left:17%;top:80%;transform:rotate(-24deg)"><g transform="translate(6 6)" fill="#111"><rect x="6" y="32" width="88" height="36" rx="18"/></g><g fill="#E0506E" stroke="#111" stroke-width="3.5" stroke-linejoin="round"><rect x="6" y="32" width="88" height="36" rx="18"/></g></svg>
+  <svg viewBox="0 0 110 110" class="dx" style="--s:clamp(36px,4vw,60px);right:17%;top:9%"><g transform="translate(6 6)" fill="#111"><circle cx="50" cy="50" r="30"/></g><g fill="#A8E06A" stroke="#111" stroke-width="3.5" stroke-linejoin="round"><circle cx="50" cy="50" r="30"/></g></svg>
+</div>
 <header id="hdr" hidden>
   <span class="logo" id="hdrLogo"></span>
   <span class="title disp">WU Phone</span>
@@ -380,7 +393,7 @@ const PHRASES = [
 /* =====================================================================
    5. АВАТАРИ, ПАЛІТРА, ЛОГОТИП
    ===================================================================== */
-const EMOJIS = ['🦊','🐸','🐼','🦄','🐙','🐝','🦖','🐧','🐱','🐶','🦉','🐷','🐵','🦁','🐨','🐔','🦀','🐳','🍕','🌵','🚀','👾','🤖','🎸'];
+const EMOJIS = ['🤡','💩','👽','🤠','🤪','🥴','😎','🤓','🥳','😈','👻','🤖','👾','🗿','🦄','🐸','🦖','🐔','🦆','🐒','🦥','🐌','🦞','🧟','🍕','🌭','🥒','🍌','🧀','🥔','🧦','🚽'];
 const AVATAR_COLORS = ['#F4C93F','#E0506E','#7EC8E3','#A8E06A','#FF9F5A','#B79CFF','#FFB3D1','#FFFFFF'];
 // палітра малювалки — навмисно не збігається з кольорами інтерфейсу
 const PALETTE = ['#000000','#6B6B6B','#C4C4C4','#FFFFFF','#E53935','#FF8A00','#FFE600','#2EAD4B',
