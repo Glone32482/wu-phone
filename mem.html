@@ -330,7 +330,8 @@ const DB_ROOT = 'mem', DB_INDEX = 'memIndex';
 const DEFAULTS = { pickSec: 45, voteSec: 30, rounds: 8, hostPlays: true };
 const LIMITS   = { pickSec: [15, 300], voteSec: [10, 300], rounds: [1, 20] };   // ті самі межі — у database.rules.json
 const MAX_NAME = 20;
-const HAND = 6;                  // скільки мемів на руці
+const HAND = 6;                  // скільки мемів на руці; щораунду рука повністю нова
+const MAX_BLOCKS = 16;           // скільки різних рук зберігаємо на гравця (далі руки йдуть по колу)
 const SCORE_SEC = 15;            // скільки показуємо підсумок раунду, якщо ведучий не тисне «Далі»
 const GRACE_MS = 2500, GONE_MS = 8000, HOST_GONE_MS = 12000, DAY_MS = 24 * 60 * 60 * 1000;
 const MEME_COUNT = 119;          // картинки лежать у теці memes/: 01.jpg, 02.jpg, …
@@ -761,11 +762,12 @@ const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.f
 // карти отримують усі, хто за столом, разом із ведучим; позначка «онлайн» на це не впливає (хто справді зник — того не чекаємо)
 const eligible = () => Object.keys(S.players);
 
-// рука = перші (HAND + раунд) карт мого потоку мінус уже зіграні
+// рука раунду = свій блок із HAND карт у моєму потоці, мінус карта, яку я вже кинув цього раунду
 function myHand() {
-  const used = new Set(), pl = S.plays || {};
-  for (const r in pl) { const v = pl[r] && pl[r][S.uid]; if (v != null) used.add(v); }
-  return S.stream.slice(0, HAND + S.phase.round).filter(i => okMeme(i) && !used.has(i));
+  const blocks = Math.floor(S.stream.length / HAND);
+  if (!blocks) return [];
+  const b = S.phase.round % blocks, mine = playsOf(S.phase.round)[S.uid];
+  return S.stream.slice(b * HAND, b * HAND + HAND).filter(i => okMeme(i) && i !== mine);
 }
 // голоси раунду: скільки отримав кожен, хто кинув мем (за себе не рахується)
 function roundTally(r) {
@@ -928,12 +930,14 @@ function pickSituations(n) {
   return picked;
 }
 
-// потік карт одного гравця на всю гру, без повторів; спільна колода тасується заново, коли закінчується
+// потік карт одного гравця на всю гру: по HAND нових карт на кожен раунд.
+// Карти в гравця не повторюються, доки не скінчиться вся колода; спільна колода тасується заново, коли закінчується.
 let deck = [];
-function dealStream(need) {
-  const stream = [];
-  while (stream.length < Math.min(need, MEME_COUNT)) {
-    const k = deck.findIndex(c => !stream.includes(c));
+function dealStream(rounds) {
+  const stream = [], need = HAND * Math.min(rounds, MAX_BLOCKS);
+  while (stream.length < need) {
+    const avoid = stream.length < MEME_COUNT ? stream : stream.slice(-HAND * 2);
+    const k = deck.findIndex(c => !avoid.includes(c));
     if (k < 0) { deck = deck.concat(shuffle(Array.from({ length: MEME_COUNT }, (_, i) => i))); continue; }
     stream.push(deck.splice(k, 1)[0]);
   }
@@ -944,7 +948,7 @@ async function startGame() {
   const ids = shuffle(eligible());
   if (ids.length < 2) return toast(T.needPlayers);
   const st = settings(), rounds = st.rounds, deal = {};
-  for (const id of ids) deal[id] = dealStream(HAND + rounds - 1);
+  for (const id of ids) deal[id] = dealStream(rounds);
   try {
     await clearGameData();
     await refs.deal.set(deal);
@@ -961,9 +965,9 @@ async function hostGo(state) {
     if (state === 'next') {
       if (ph.round + 1 >= ph.rounds) await refs.phase.update({ state: 'final' });
       else {
-        // хто підсів під час гри — отримує карти з наступного раунду (999 — заглушки на місці пропущених раундів)
+        // хто підсів під час гри — отримує карти з наступного раунду
         const ord = order(), next = ph.round + 1, late = Object.keys(S.players).filter(id => !ord.includes(id));
-        for (const id of late) await refs.deal.child(id).set(Array(next).fill(999).concat(dealStream(HAND + ph.rounds - 1 - next)));
+        for (const id of late) await refs.deal.child(id).set(dealStream(ph.rounds));
         const upd = { state: 'pick', round: next, startedAt: TS, duration: st.pickSec };
         if (late.length) upd.order = ord.concat(late);
         await refs.phase.update(upd);
