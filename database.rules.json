@@ -3,7 +3,7 @@
     ".read": false,
     ".write": false,
     "roomIndex": {
-      ".read": "auth != null && query.orderByValue && query.endAt < now - 86400000",
+      ".read": "auth != null",
       ".indexOn": ".value",
       "$code": {
         ".write": "auth != null && $code.matches(/^[A-Z]{4}$/) && ((!data.exists() && newData.val() === now && root.child('rooms').child($code).child('meta').child('hostId').val() === auth.uid) || (data.exists() && !newData.exists() && data.val() < now - 86400000))",
@@ -226,7 +226,7 @@
       }
     },
     "memIndex": {
-      ".read": "auth != null && query.orderByValue && query.endAt < now - 86400000",
+      ".read": "auth != null",
       ".indexOn": ".value",
       "$code": {
         ".write": "auth != null && $code.matches(/^[A-Z]{4}$/) && ((!data.exists() && newData.val() === now && root.child('mem').child($code).child('meta').child('hostId').val() === auth.uid) || (data.exists() && !newData.exists() && data.val() < now - 86400000))",

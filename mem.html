@@ -370,7 +370,6 @@ const T = {
   pickSec: 'Час на вибір мему, с',
   voteSec: 'Час на голосування, с',
   rounds: 'Кількість раундів',
-  hostPlays: 'Ведучий теж грає',
   lobbyInfo: (players, rounds) => `Гравців: ${players} · раундів: ${rounds}`,
   settingsInfo: s => `🃏 ${s.pickSec} с · 🗳 ${s.voteSec} с · раундів: ${s.rounds}`,
   start: 'Роздати карти',
@@ -387,7 +386,7 @@ const T = {
   played: 'Твій мем на столі! Чекаємо на інших…',
   throwBtn: 'Кинути на стіл',
   yourMeme: 'твій мем',
-  spectator: 'Ти глядач: карти роздадуть у наступній грі, а голосувати можна вже зараз.',
+  spectator: 'Ти підсів посеред раунду: карти отримаєш з наступного раунду, а голосувати можна вже зараз.',
   zoom: 'Збільшити',
   endPick: 'До голосування зараз',
   showScore: 'Показати підсумок',
@@ -759,7 +758,8 @@ const votesOf = r => (S.votes && S.votes[r]) || {};
 const okMeme = i => Number.isInteger(i) && i >= 0 && i < MEME_COUNT;
 const memeUrl = i => 'memes/' + String(i + 1).padStart(2, '0') + '.jpg';
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-const eligible = () => { const st = settings(); return onlineIds().filter(id => st.hostPlays || id !== S.meta.hostId); };
+// карти отримують усі, хто за столом, разом із ведучим; позначка «онлайн» на це не впливає (хто справді зник — того не чекаємо)
+const eligible = () => Object.keys(S.players);
 
 // рука = перші (HAND + раунд) карт мого потоку мінус уже зіграні
 function myHand() {
@@ -858,8 +858,8 @@ function enterRoom(code) {
   refs.plays.on('value', s => { S.plays = s.val() || {}; render(); }, () => {});
   refs.votes.on('value', s => { S.votes = s.val() || {}; render(); }, () => {});
   refs.deal.child(S.uid).on('value', s => {
-    S.stream = toArr(s.val()).filter(okMeme);
-    S.stream.forEach(i => { new Image().src = memeUrl(i); });      // підвантажуємо свої карти наперед
+    S.stream = toArr(s.val());
+    S.stream.filter(okMeme).forEach(i => { new Image().src = memeUrl(i); });      // підвантажуємо свої карти наперед
     render();
   }, () => {});
   refs.reactions.on('child_added', onReaction, () => {});
@@ -928,21 +928,23 @@ function pickSituations(n) {
   return picked;
 }
 
+// потік карт одного гравця на всю гру, без повторів; спільна колода тасується заново, коли закінчується
+let deck = [];
+function dealStream(need) {
+  const stream = [];
+  while (stream.length < Math.min(need, MEME_COUNT)) {
+    const k = deck.findIndex(c => !stream.includes(c));
+    if (k < 0) { deck = deck.concat(shuffle(Array.from({ length: MEME_COUNT }, (_, i) => i))); continue; }
+    stream.push(deck.splice(k, 1)[0]);
+  }
+  return stream;
+}
+
 async function startGame() {
   const ids = shuffle(eligible());
   if (ids.length < 2) return toast(T.needPlayers);
-  const st = settings(), rounds = st.rounds, need = HAND + rounds - 1, all = () => shuffle(Array.from({ length: MEME_COUNT }, (_, i) => i));
-  // кожному — свій потік карт без повторів; колода тасується заново, коли закінчується
-  const deal = {}; let deck = [];
-  for (const id of ids) {
-    const stream = [];
-    while (stream.length < Math.min(need, MEME_COUNT)) {
-      const k = deck.findIndex(c => !stream.includes(c));
-      if (k < 0) { deck = deck.concat(all()); continue; }
-      stream.push(deck.splice(k, 1)[0]);
-    }
-    deal[id] = stream;
-  }
+  const st = settings(), rounds = st.rounds, deal = {};
+  for (const id of ids) deal[id] = dealStream(HAND + rounds - 1);
   try {
     await clearGameData();
     await refs.deal.set(deal);
@@ -958,7 +960,14 @@ async function hostGo(state) {
     const ph = S.phase, st = settings();
     if (state === 'next') {
       if (ph.round + 1 >= ph.rounds) await refs.phase.update({ state: 'final' });
-      else await refs.phase.update({ state: 'pick', round: ph.round + 1, startedAt: TS, duration: st.pickSec });
+      else {
+        // хто підсів під час гри — отримує карти з наступного раунду (999 — заглушки на місці пропущених раундів)
+        const ord = order(), next = ph.round + 1, late = Object.keys(S.players).filter(id => !ord.includes(id));
+        for (const id of late) await refs.deal.child(id).set(Array(next).fill(999).concat(dealStream(HAND + ph.rounds - 1 - next)));
+        const upd = { state: 'pick', round: next, startedAt: TS, duration: st.pickSec };
+        if (late.length) upd.order = ord.concat(late);
+        await refs.phase.update(upd);
+      }
     } else await refs.phase.update({ state, startedAt: TS, duration: state === 'vote' ? st.voteSec : SCORE_SEC });
   } catch (e) { console.error(e); }
   finally { hostBusy = false; }
@@ -1204,8 +1213,6 @@ function refreshLobby() {
         h('label', { class: 'setrow' }, T.rounds, num('rounds')),
         h('label', { class: 'setrow' }, T.pickSec, num('pickSec')),
         h('label', { class: 'setrow' }, T.voteSec, num('voteSec')),
-        h('label', { class: 'setrow' }, T.hostPlays, h('input', { type: 'checkbox', class: 'chk', id: 'set_hostPlays',
-          onchange: e => refs.meta.child('settings/hostPlays').set(e.target.checked) })),
         h('div', { class: 'hint', id: 'lobbyInfo', style: { margin: '12px 0' } }),
         h('button', { type: 'button', class: 'btn big p', id: 'startBtn', style: { width: '100%' }, onclick: startGame }, T.start));
     } else {
@@ -1214,7 +1221,6 @@ function refreshLobby() {
   }
   if (host) {
     for (const k of ['rounds', 'pickSec', 'voteSec']) { const el = $('#set_' + k); if (document.activeElement !== el) el.value = st[k]; }
-    $('#set_hostPlays').checked = !!st.hostPlays;
     $('#startBtn').disabled = n < 2;
     $('#lobbyInfo').textContent = n < 2 ? T.needPlayers : T.lobbyInfo(n, st.rounds);
   } else {
