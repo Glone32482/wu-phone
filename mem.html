@@ -233,8 +233,8 @@ h1{font-size:clamp(34px,7vw,64px)} h2{font-size:clamp(22px,4vw,34px)} h3{font-si
 .tc.spot .mcard{box-shadow:10px 10px 0 var(--k)}
 .tn{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:7px;font:800 13px/1.2 Manrope,sans-serif;background:#fff;border:2px solid var(--k);border-radius:7px;padding:2px 7px;
   white-space:nowrap;max-width:130%;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .2s;pointer-events:none}
-.stage.show .tn,.tc.spot .tn{opacity:1}
-.tc.own .mcard{outline:5px solid var(--b)}
+.stage[data-st=score] .tn{opacity:1}
+.stage[data-st=score] .tc.own .mcard{outline:5px solid var(--b)}
 .tc.on{--sc:1.05}
 .tc.on .mcard{outline:7px solid var(--p)}
 .tc.win{--sc:1.1;z-index:6}
@@ -248,10 +248,10 @@ h1{font-size:clamp(34px,7vw,64px)} h2{font-size:clamp(22px,4vw,34px)} h3{font-si
 .stage[data-st=score] .tc .vb{display:block;animation:pop .22s both}
 .stage:not(.show) .tc .zoom{display:none}
 .stage[data-st=pick] .tc{cursor:zoom-in}
-.stage[data-st=vote] .tc:not(.own){cursor:pointer}
+.stage[data-st=vote] .tc{cursor:pointer}
 @media(hover:hover){
   .stage[data-st=pick] .tc:not(.spot):hover{--sc:2;z-index:50}
-  .stage[data-st=vote] .tc:not(.own):not(.on):hover{--sc:1.04}
+  .stage[data-st=vote] .tc:not(.on):hover{--sc:1.04}
 }
 
 /* рука «прилипає» до низу екрана, як у картярських іграх, — її видно без прокручування */
@@ -387,6 +387,7 @@ const T = {
   played: 'Твій мем на столі! Чекаємо на інших…',
   throwBtn: 'Кинути на стіл',
   yourMeme: 'твій мем',
+  ownVote: 'Це твій мем — за нього голосувати не можна',
   spectator: 'Ти підсів посеред раунду: карти отримаєш з наступного раунду, а голосувати можна вже зараз.',
   zoom: 'Збільшити',
   endPick: 'До голосування зараз',
@@ -1268,6 +1269,11 @@ window.addEventListener('resize', () => { if (curKey === 'game') layoutStage(); 
 // перебудовує частину екрана лише коли змінився її ключ — щоб анімації не програвалися повторно
 function keyed(name, key, fn) { if (S.keys[name] === key) return; S.keys[name] = key; fn(); }
 
+// Анонімність: поки не підбито підсумок раунду, ніщо на екрані не показує, чий мем.
+// Місце карти на столі й у сітці залежить від гешу (гравець + раунд), а не від того, де сидить її власник.
+const hashStr = t => { let v = 2166136261; for (let i = 0; i < t.length; i++) { v ^= t.charCodeAt(i); v = Math.imul(v, 16777619); } return v >>> 0; };
+const anonSort = (ids, r) => ids.slice().sort((x, y) => hashStr(x + ':' + r) - hashStr(y + ':' + r) || (x < y ? -1 : 1));
+
 // я завжди сиджу знизу по центру, решта — за годинниковою стрілкою
 function seatOrder() { const ord = order(), i = ord.indexOf(S.uid); return i > 0 ? ord.slice(i).concat(ord.slice(0, i)) : ord; }
 
@@ -1337,15 +1343,19 @@ function layoutStage() {
     el.classList.toggle('flipnm', ring[i][1] < -b * 0.55);
   });
 
-  // карта лежить просто перед своїм гравцем; розмір — щоб верхні й нижні карти не зустрілися посередині
-  const cs = Math.max(48, Math.min(n <= 6 ? 150 : n <= 10 ? 122 : n <= 16 ? 98 : n <= 26 ? 78 : 62, n <= 6 ? 2 * b - (cH - sitH / 2) - av / 2 - 22 : b - av / 2 + 8, small ? 66 : 999));
-  const sorted = cardIds.slice().sort((x, y) => st === 'score' ? (tally[y] || 0) - (tally[x] || 0) || (x < y ? -1 : 1) : (x < y ? -1 : 1));
+  // вибір мему: карти лежать рядами посеред столу, у «нічийних» комірках
+  const yTop = -b + (cH - sitH / 2) + 10, yBot = b - av / 2 - 10, rows = n <= 7 ? 1 : n <= 18 ? 2 : 3, cols = Math.ceil(n / rows), spanX = 2 * (a - av / 2 - 22);
+  const cs = Math.max(48, Math.min(n <= 4 ? 190 : n <= 7 ? 160 : n <= 18 ? 120 : 92, (yBot - yTop - 8 * (rows - 1)) / rows, spanX / cols * 1.3, small ? 70 : 999));
+  const stepX = Math.min(cs + 16, cols > 1 ? (spanX - cs) / (cols - 1) : 0), stepY = Math.min(cs + 8, rows > 1 ? (yBot - yTop - cs) / (rows - 1) : 0);
+  const slots = anonSort(ord, r);
+  const sorted = st === 'score' ? cardIds.slice().sort((x, y) => (tally[y] || 0) - (tally[x] || 0) || (x < y ? -1 : 1)) : anonSort(cardIds, r);
+  G.geo = { cx, cy: cy + (yTop + yBot) / 2, W, H: yBot - yTop };
   cardIds.forEach(id => {
     const el = G.cards.get(id); if (!el || el.dataset.spot) return;
     let x, y, size, rot;
     if (!show) {
-      const q = ring[ord.indexOf(id)], nx = q[0] / (a * a), ny = q[1] / (b * b), nl = Math.hypot(nx, ny) || 1, d = av / 2 + cs / 2 + 8;
-      x = cx + q[0] - nx / nl * d; y = cy + q[1] - ny / nl * d; size = cs; rot = el.dataset.rot;
+      const k = slots.indexOf(id), row = Math.floor(k / cols), col = k % cols, inRow = Math.min(cols, n - row * cols);
+      x = cx + (col - (inRow - 1) / 2) * stepX; y = G.geo.cy + (row - (rows - 1) / 2) * stepY; size = cs; rot = el.dataset.rot;
     } else {
       const k = sorted.indexOf(id), row = Math.floor(k / grid.cols), col = k % grid.cols;
       const inRow = Math.min(grid.cols, sorted.length - row * grid.cols), rowW = inRow * grid.size + (inRow - 1) * grid.gap;
@@ -1355,12 +1365,12 @@ function layoutStage() {
     }
     el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.width = size + 'px'; el.style.setProperty('--r', rot + 'deg');
   });
-  G.geo = { cx, cy, W, H };
 }
 
 function onCardClick(id) {
   const ph = S.phase, card = playsOf(ph.round)[id];
-  if (ph.state === 'vote' && id !== S.uid) { castVote(id); sfx('vote'); }
+  if (ph.state === 'vote' && id === S.uid) toast(T.ownVote);
+  else if (ph.state === 'vote') { castVote(id); sfx('vote'); }
   else if (okMeme(card)) openZoom(card);
 }
 
@@ -1387,7 +1397,7 @@ function refreshGame() {
     }
     const cl = el.classList;
     cl.toggle('me', id === S.uid); cl.toggle('off', !p || p.online === false);
-    cl.toggle('think', st === 'pick' && pl[id] == null); cl.toggle('voted', st === 'vote' && vt[id] != null); cl.toggle('gain', !!tally[id]);
+    cl.toggle('think', false);          // хто вже кинув, а хто ще думає — не показуємо: інакше видно, чий мем cl.toggle('voted', st === 'vote' && vt[id] != null); cl.toggle('gain', !!tally[id]);
     el.querySelector('.plus').textContent = tally[id] ? '+' + tally[id] : '';
     const pts = el.querySelector('.pts'), v = String(sc[id] || 0);
     if (pts.textContent !== v) { pts.textContent = v; if (!G.fresh) { pts.classList.remove('bump'); void pts.offsetWidth; pts.classList.add('bump'); } }
@@ -1437,25 +1447,24 @@ function refreshGame() {
 
   layoutStage();
 
-  // політ нової карти: від гравця → крупно в центр столу (щоб усі встигли посміятися) → на своє місце
+  // нова карта з’являється з центру столу → секунду крупним планом → у свою комірку (звідки вона «прилетіла» — не видно)
   fresh.forEach(id => {
-    const el = G.cards.get(id), seat = G.seats.get(id);
-    if (G.fresh || st !== 'pick' || !seat) return;
+    const el = G.cards.get(id), g = G.geo;
+    if (G.fresh || st !== 'pick') return;
     const target = { left: el.style.left, top: el.style.top, width: el.style.width };
     el.style.transition = 'none';
-    el.style.left = seat.style.left; el.style.top = seat.style.top; el.style.width = '26px'; el.style.opacity = '0';
+    el.style.left = g.cx + 'px'; el.style.top = g.cy + 'px'; el.style.width = '26px'; el.style.opacity = '0';
     void el.offsetWidth;
     el.style.transition = '';
-    seat.classList.remove('pop'); void seat.offsetWidth; seat.classList.add('pop');
     const now = performance.now(), start = Math.max(now, G.spotAt), wait = start - now;
     if (wait > 2400) { el.style.opacity = ''; Object.assign(el.style, target); sfx('throw'); return; }   // черга завелика — кладемо одразу
     G.spotAt = start + 1050;
     el.dataset.spot = '1';
     setTimeout(() => {
       if (!el.isConnected) return;
-      const g = G.geo; sfx('throw');
+      sfx('throw');
       el.style.opacity = ''; el.classList.add('spot');
-      el.style.left = g.cx + 'px'; el.style.top = (g.cy + g.H * 0.04) + 'px'; el.style.width = Math.min(g.H * 0.6, g.W * 0.42, 340) + 'px'; el.style.setProperty('--r', '0deg');
+      el.style.left = G.geo.cx + 'px'; el.style.top = G.geo.cy + 'px'; el.style.width = Math.min(Math.max(G.geo.H * 1.15, 220), G.geo.W * 0.42, 340) + 'px'; el.style.setProperty('--r', '0deg');
     }, wait);
     setTimeout(() => { if (!el.isConnected) return; el.classList.remove('spot'); delete el.dataset.spot; layoutStage(); }, wait + 1050);
   });
