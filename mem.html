@@ -274,6 +274,23 @@ h1{font-size:clamp(34px,7vw,64px)} h2{font-size:clamp(22px,4vw,34px)} h3{font-si
 #zoom img{max-width:100%;max-height:100%;border:var(--bd);border-radius:12px;background:#fff}
 .rank{display:flex;align-items:center;gap:12px;background:#fff;border:var(--bd);border-radius:12px;padding:8px 14px;margin-bottom:10px;font-weight:800}
 .rank .n{font:900 16px Unbounded,sans-serif;width:34px}
+.sitinp{font-size:18px;resize:vertical;min-height:76px}
+.sitfoot{display:flex;justify-content:space-between;gap:12px;font-size:14px;font-weight:700;opacity:.75;min-height:20px}
+.sit small{display:block;font:700 12px/1.3 Manrope,sans-serif;opacity:.7;margin-top:3px}
+@media(max-width:560px){.pod.first{padding:14px}.pod.first .medal{font-size:44px}.pod .vtext{overflow-wrap:break-word}}
+.best{margin:26px 0 22px}
+.best .bsit{font:800 clamp(18px,2.6vw,24px)/1.3 Manrope,sans-serif;overflow-wrap:anywhere}
+.best img{display:block;width:100%;max-height:520px;object-fit:contain;background:#fff;border:var(--bd);border-radius:12px;cursor:zoom-in}
+.cardbtns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:22px}
+.hall{max-width:980px;margin:44px auto 0}
+.hall h2{text-align:center;margin-bottom:20px}
+.hallgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:20px}
+.hallit{display:flex;flex-direction:column;gap:10px;padding:14px;margin:0}
+.hallit img.m{display:block;width:100%;height:190px;object-fit:contain;background:#fff;border:2px solid var(--k);border-radius:10px;cursor:zoom-in}
+.hallit .who{display:flex;gap:10px;align-items:center;font-weight:800;min-width:0}
+.hallit .who .nm{overflow-wrap:anywhere}
+.hallit .hs{font-weight:700;font-size:15px;line-height:1.3;overflow-wrap:anywhere}
+.hallit .hd{font-size:13px;font-weight:700;opacity:.65}
 @media(max-width:760px){
   #mHand{position:static;margin-top:10px}
   .handbar{display:block}
@@ -326,15 +343,17 @@ const FIREBASE_CONFIG = {
 /* =====================================================================
    2. НАЛАШТУВАННЯ ГРИ
    ===================================================================== */
-const DB_ROOT = 'mem', DB_INDEX = 'memIndex';
+const DB_ROOT = 'mem', DB_INDEX = 'memIndex', DB_HALL = 'memHall';
 const DEFAULTS = { pickSec: 45, voteSec: 30, rounds: 8, hostPlays: true };
 const LIMITS   = { pickSec: [15, 300], voteSec: [10, 300], rounds: [1, 20] };   // ті самі межі — у database.rules.json
 const MAX_NAME = 20;
+const MIN_SIT = 3, MAX_SIT = 140;  // межі ситуації від гравця — ті самі, що в database.rules.json
+const HALL_SHOW = 12;            // скільки останніх ігор показуємо в Залі слави
 const HAND = 6;                  // скільки мемів на руці; щораунду рука повністю нова
-const MAX_BLOCKS = 16;           // скільки різних рук зберігаємо на гравця (далі руки йдуть по колу)
+const MAX_BLOCKS = 20;           // скільки різних рук зберігаємо на гравця: по одній на кожен можливий раунд
 const SCORE_SEC = 15;            // скільки показуємо підсумок раунду, якщо ведучий не тисне «Далі»
 const GRACE_MS = 2500, GONE_MS = 8000, HOST_GONE_MS = 12000, DAY_MS = 24 * 60 * 60 * 1000;
-const MEME_COUNT = 119;          // картинки лежать у теці memes/: 01.jpg, 02.jpg, …
+const MEME_COUNT = 191;          // картинки лежать у теці memes/: 01.jpg, 02.jpg, …
 const REACTIONS = ['😂', '🔥', '😱', '❤️', '👏', '🤯', '💩'];
 
 /* =====================================================================
@@ -373,6 +392,14 @@ const T = {
   rounds: 'Кількість раундів',
   lobbyInfo: (players, rounds) => `Гравців: ${players} · раундів: ${rounds}`,
   settingsInfo: s => `🃏 ${s.pickSec} с · 🗳 ${s.voteSec} с · раундів: ${s.rounds}`,
+  sitTitle: 'Твоя ситуація (необов’язково)',
+  sitPh: 'Коли Оля знову забула вимкнути мікрофон на дзвінку…',
+  sitHint: 'Потрапить у гру анонімно: імені автора ніхто не побачить. Найкраще заходять жарти про своїх.',
+  sitSaved: '✓ Збережено',
+  sitShort: n => `Щонайменше ${n} символи`,
+  sitCount: n => `Ситуацій від гравців: ${n}`,
+  sitMark: 'Цей гравець написав ситуацію',
+  sitFromPlayer: '✍️ від когось із гравців',
   start: 'Роздати карти',
   needPlayers: 'Потрібно щонайменше 2 гравці',
   waitHost: 'Чекаємо, поки ведучий роздасть карти…',
@@ -399,6 +426,18 @@ const T = {
   finalTitle: 'Фінал',
   points: n => `${n} б.`,
   newGame: 'Нова гра',
+  bestMeme: '🃏 Найкращий мем партії',
+  bestBy: (name, n) => `${name} · голосів: ${n}`,
+  winnerOne: 'Переможець',
+  winnerMany: 'Переможці',
+  saveCard: '⬇ Зберегти картку',
+  copyCard: '📋 Скопіювати картку',
+  cardCopied: 'Картку скопійовано — встав її в чат!',
+  cardFail: 'Не вдалося підготувати картку',
+  cardRoom: code => `Стіл ${code}`,
+  hallTitle: '🏆 Зал слави',
+  hallScore: n => `${n} б.`,
+  hallPlayers: n => `гравців: ${n}`,
   sendFail: 'Не вдалося надіслати. Перевір інтернет.',
   soundOn: 'Звук увімкнено — натисни, щоб вимкнути',
   soundOff: 'Звук вимкнено — натисни, щоб увімкнути',
@@ -739,7 +778,7 @@ const S = {
   meta: null, players: {}, phase: null, loaded: {},
   joined: false, connected: false, offset: 0, offsetReady: false,
   muted: LS.get('muted', false), beeped: null,
-  plays: {}, votes: {}, stream: [],     // plays[раунд][гравець] = номер мему; stream — мої карти на всю гру
+  plays: {}, votes: {}, customSits: {}, stream: [],     // customSits[гравець] = його ситуація; plays[раунд][гравець] = номер мему; stream — мої карти на всю гру
   selected: null, pile: null, keys: {}, autoAt: 0,
   claimAt: 0, reactAt: 0, lastReact: {}
 };
@@ -757,6 +796,9 @@ const isGone = id => { const p = S.players[id]; return !p || (p.online === false
 const deadline = () => S.phase.startedAt + S.phase.duration * 1000;
 const playsOf = r => (S.plays && S.plays[r]) || {};
 const votesOf = r => (S.votes && S.votes[r]) || {};
+const okSit = v => typeof v === 'string' && v.trim().length >= MIN_SIT && v.length <= MAX_SIT;
+// ситуація в phase.sits — або номер із банку SITUATIONS, або текст від гравця
+const sitText = v => typeof v === 'string' ? v : SITUATIONS[v] || '…';
 const okMeme = i => Number.isInteger(i) && i >= 0 && i < MEME_COUNT;
 const memeUrl = i => 'memes/' + String(i + 1).padStart(2, '0') + '.jpg';
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -776,6 +818,15 @@ function roundTally(r) {
   for (const voter in vt) { const t = vt[voter]; if (t !== voter && pl[t] != null) out[t] = (out[t] || 0) + 1; }
   return out;
 }
+// найкращий мем партії: найбільше голосів за один раунд; за рівних — той, що був раніше
+function bestMeme() {
+  let best = null;
+  for (let r = 0; r <= S.phase.round; r++) {
+    const pl = playsOf(r), t = roundTally(r);
+    for (const id in t) if (okMeme(pl[id]) && (!best || t[id] > best.votes)) best = { id, card: pl[id], votes: t[id], r };
+  }
+  return best;
+}
 // загальний рахунок = сума голосів за всі завершені раунди
 function scores() {
   const ph = S.phase, out = {};
@@ -783,6 +834,12 @@ function scores() {
   const last = ph.state === 'score' || ph.state === 'final' ? ph.round : ph.round - 1;
   for (let r = 0; r <= last; r++) { const t = roundTally(r); for (const id in t) out[id] = (out[id] || 0) + t[id]; }
   return out;
+}
+
+// хто набрав найбільше балів (порожньо, якщо ніхто не отримав жодного голосу)
+function winnerIds() {
+  const sc = scores(), top = Math.max(0, ...order().map(id => sc[id] || 0));
+  return top ? order().filter(id => sc[id] === top) : [];
 }
 
 /* =====================================================================
@@ -837,7 +894,7 @@ function enterRoom(code) {
   S.room = code; S.loaded = {}; S.joined = false;
   const base = db.ref(DB_ROOT + '/' + code);
   refs = { base, meta: base.child('meta'), players: base.child('players'), phase: base.child('phase'), me: base.child('players/' + S.uid),
-           deal: base.child('deal'), plays: base.child('plays'), votes: base.child('votes'), reactions: base.child('reactions') };
+           deal: base.child('deal'), plays: base.child('plays'), votes: base.child('votes'), reactions: base.child('reactions'), customSits: base.child('customSits') };
   const onErr = e => { console.error(e); toast(T.errGeneric); };
   refs.meta.on('value', s => {
     const prev = S.meta && S.meta.hostId;
@@ -860,6 +917,7 @@ function enterRoom(code) {
   refs.phase.on('value', s => { S.phase = s.val() || { state: 'lobby' }; S.loaded.phase = true; render(); }, onErr);
   refs.plays.on('value', s => { S.plays = s.val() || {}; render(); }, () => {});
   refs.votes.on('value', s => { S.votes = s.val() || {}; render(); }, () => {});
+  refs.customSits.on('value', s => { S.customSits = s.val() || {}; render(); }, () => {});
   refs.deal.child(S.uid).on('value', s => {
     S.stream = toArr(s.val());
     S.stream.filter(okMeme).forEach(i => { new Image().src = memeUrl(i); });      // підвантажуємо свої карти наперед
@@ -872,8 +930,8 @@ function enterRoom(code) {
 function leaveRoom(msg) {
   if (!S.room) return;
   if (S.joined) refs.me.onDisconnect().cancel();
-  refs.meta.off(); refs.players.off(); refs.phase.off(); refs.plays.off(); refs.votes.off(); refs.deal.child(S.uid).off(); refs.reactions.off();
-  S.room = null; S.joined = false; S.meta = null; S.players = {}; S.phase = null; S.loaded = {}; S.plays = {}; S.votes = {}; S.stream = [];
+  refs.meta.off(); refs.players.off(); refs.phase.off(); refs.plays.off(); refs.votes.off(); refs.customSits.off(); refs.deal.child(S.uid).off(); refs.reactions.off();
+  S.room = null; S.joined = false; S.meta = null; S.players = {}; S.phase = null; S.loaded = {}; S.plays = {}; S.votes = {}; S.customSits = {}; S.stream = [];
   history.replaceState(null, '', location.pathname);
   if (msg) toast(msg);
   render();
@@ -921,19 +979,30 @@ function joinRoom(profile) {
    ===================================================================== */
 const clearGameData = () => Promise.all([refs.deal, refs.plays, refs.votes, refs.reactions].map(r => r.remove().catch(() => {})));
 
-// ситуації не повторюються між іграми: використані пам’ятає браузер ведучого
+// спершу ситуації від гравців (якщо їх більше за раунди — випадкові), решту добираємо з банку; порядок випадковий.
+// Банк не повторюється між іграми: використані пам’ятає браузер ведучого
 function pickSituations(n) {
+  const own = shuffle(Object.keys(S.players).map(id => S.customSits[id]).filter(okSit)).slice(0, n), need = n - own.length;
   let used = LS.get('memUsedSits', []).filter(i => i < SITUATIONS.length);
   let pool = SITUATIONS.map((_, i) => i).filter(i => !used.includes(i));
-  if (pool.length < n) { used = []; pool = SITUATIONS.map((_, i) => i); }
-  const picked = shuffle(pool).slice(0, n);
+  if (pool.length < need) { used = []; pool = SITUATIONS.map((_, i) => i); }
+  const picked = shuffle(pool).slice(0, need);
   LS.set('memUsedSits', used.concat(picked));
-  return picked;
+  return shuffle(own.concat(picked));
 }
 
 // потік карт одного гравця на всю гру: по HAND нових карт на кожен раунд.
 // Карти в гравця не повторюються, доки не скінчиться вся колода; спільна колода тасується заново, коли закінчується.
-let deck = [];
+// Залишок колоди пам’ятає браузер ведучого, тож наступна гра продовжує її, а не починає спочатку.
+// Нові меми (MEME_COUNT виріс) стають на початок колоди.
+function loadDeck() {
+  const saved = LS.get('memDeck', null);
+  if (!saved) return [];
+  const fresh = [];
+  for (let i = saved.count; i < MEME_COUNT; i++) fresh.push(i);
+  return shuffle(fresh).concat(toArr(saved.deck).filter(okMeme));
+}
+let deck = loadDeck();
 function dealStream(rounds) {
   const stream = [], need = HAND * Math.min(rounds, MAX_BLOCKS);
   while (stream.length < need) {
@@ -942,6 +1011,7 @@ function dealStream(rounds) {
     if (k < 0) { deck = deck.concat(shuffle(Array.from({ length: MEME_COUNT }, (_, i) => i))); continue; }
     stream.push(deck.splice(k, 1)[0]);
   }
+  LS.set('memDeck', { count: MEME_COUNT, deck });
   return stream;
 }
 
@@ -964,7 +1034,7 @@ async function hostGo(state) {
   try {
     const ph = S.phase, st = settings();
     if (state === 'next') {
-      if (ph.round + 1 >= ph.rounds) await refs.phase.update({ state: 'final' });
+      if (ph.round + 1 >= ph.rounds) { await refs.phase.update({ state: 'final' }); saveToHall(); }
       else {
         // хто підсів під час гри — отримує карти з наступного раунду
         const ord = order(), next = ph.round + 1, late = Object.keys(S.players).filter(id => !ord.includes(id));
@@ -980,8 +1050,20 @@ async function hostGo(state) {
 
 async function endGame(ask) {
   if (ask && !confirm(T.endConfirm)) return;
-  try { await refs.phase.set({ state: 'lobby' }); await clearGameData(); }
+  try { await refs.phase.set({ state: 'lobby' }); await Promise.all([clearGameData(), refs.customSits.remove().catch(() => {})]); }
   catch (e) { console.error(e); toast(T.errGeneric); }
+}
+
+// запис у Зал слави робить ведучий один раз, коли гра доходить до фіналу
+function saveToHall() {
+  const w = winnerIds();
+  if (!w.length) return;
+  const sc = scores(), best = bestMeme(), p = S.players[w[0]] || {}, name = id => (S.players[id] || {}).name || '—';
+  const rec = { t: TS, room: S.room, names: w.map(name).join(', ').slice(0, 80), score: sc[w[0]], players: order().length };
+  if (isAva(p.avatar)) rec.avatar = p.avatar;
+  if (p.color) rec.color = okColor(p.color);
+  if (best) Object.assign(rec, { meme: best.card, sit: sitText(toArr(S.phase.sits)[best.r]), by: name(best.id), votes: best.votes });
+  db.ref(DB_HALL + '/' + Math.round(serverNow()) + '-' + S.room).set(rec).catch(e => console.warn('hall skipped:', e && e.message));
 }
 
 function playCard(card) {
@@ -1091,6 +1173,7 @@ function render() {
       mountProfile(root, false);
       root.append(h('div', { class: 'narrow center', style: { marginTop: '28px' } },
         h('a', { class: 'btn b', href: 'index.html', style: { display: 'inline-block', textDecoration: 'none' } }, T.otherGame)));
+      mountHall(root);
     }
     else if (key === 'join') mountProfile(root, true);
     else if (key === 'lobby') mountLobby(root);
@@ -1174,6 +1257,28 @@ function mountProfile(root, joining) {
 }
 
 
+/* ---------- Зал слави ---------- */
+async function mountHall(root) {
+  const box = h('div', { class: 'hall', hidden: true });
+  root.append(box);
+  let items = [];
+  try {
+    const snap = await db.ref(DB_HALL).limitToLast(HALL_SHOW).once('value');
+    snap.forEach(ch => { items.unshift(ch.val()); });
+  } catch (e) { return console.warn('hall skipped:', e && e.message); }
+  if (!items.length || !box.isConnected) return;
+  box.append(h('h2', {}, T.hallTitle), h('div', { class: 'hallgrid' }, items.map(it => {
+    const when = new Date(it.t).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' });
+    return h('div', { class: 'card hallit' },
+      h('div', { class: 'who' }, avatarEl({ avatar: it.avatar, color: it.color }), h('span', { class: 'nm grow' }, '🏆 ' + it.names), h('span', {}, T.hallScore(it.score))),
+      okMeme(it.meme) && h('img', { class: 'm', src: memeUrl(it.meme), alt: '', loading: 'lazy', draggable: false, onclick: () => openZoom(it.meme) }),
+      it.sit && h('div', { class: 'hs' }, it.sit),
+      it.by && h('div', { class: 'hd' }, T.bestBy(it.by, it.votes)),
+      h('div', { class: 'hd' }, when + ' · ' + T.hallPlayers(it.players)));
+  })));
+  box.hidden = false;
+}
+
 /* ---------- лобі ---------- */
 function mountLobby(root) {
   lobbyCtlKey = null; S.selected = null; S.beeped = null; S.pile = null;
@@ -1187,10 +1292,32 @@ function mountLobby(root) {
           h('div', { class: 'code disp' }, S.room),
           h('div', { class: 'link' }, link),
           h('button', { type: 'button', class: 'btn w', onclick: () => copyText(link) }, T.copyLink)),
+        h('div', { class: 'card stack' },
+          h('h3', {}, T.sitTitle),
+          h('textarea', { class: 'inp sitinp', id: 'mySit', maxLength: MAX_SIT, placeholder: T.sitPh, 'aria-label': T.sitTitle, value: S.customSits[S.uid] || '',
+            oninput: () => { clearTimeout(sitTimer); sitTimer = setTimeout(saveSit, 600); paintSit(); }, onblur: saveSit }),
+          h('div', { class: 'sitfoot' }, h('span', { id: 'sitState' }), h('span', { id: 'sitCount' })),
+          h('div', { class: 'hint' }, T.sitHint)),
         h('div', { class: 'card tilt-r', id: 'lobbyCtl' })),
       h('div', { class: 'card' }, h('h3', { id: 'plTitle' }), h('div', { class: 'plist', id: 'plList' }))
     )
   );
+}
+
+// ситуація зберігається сама, щойно гравець перестав друкувати; порожнє поле її видаляє
+let sitTimer = null;
+function saveSit() {
+  clearTimeout(sitTimer); sitTimer = null;
+  const el = $('#mySit');
+  if (!el || !S.room) return;
+  const v = el.value.trim();
+  if (v === (S.customSits[S.uid] || '') || (v && v.length < MIN_SIT)) return paintSit();
+  (v ? refs.customSits.child(S.uid).set(v) : refs.customSits.child(S.uid).remove()).catch(() => toast(T.sendFail));
+}
+function paintSit() {
+  const v = $('#mySit').value.trim();
+  $('#sitState').textContent = !v ? '' : v.length < MIN_SIT ? T.sitShort(MIN_SIT) : v === S.customSits[S.uid] ? T.sitSaved : '';
+  $('#sitCount').textContent = T.sitCount(Object.keys(S.players).filter(id => okSit(S.customSits[id])).length);
 }
 
 function refreshLobby() {
@@ -1202,10 +1329,15 @@ function refreshLobby() {
     return h('div', { class: 'pl' + (p.online === false ? ' off' : '') }, avatarEl(p), h('b', {}, p.name),
       id === S.meta.hostId && h('span', { class: 'tagm' }, T.host),
       id === S.uid && h('span', { class: 'tagm', style: { background: '#fff' } }, T.you),
+      okSit(S.customSits[id]) && h('span', { title: T.sitMark, 'aria-label': T.sitMark }, '✍️'),
       h('span', { class: 'grow' }),
       host && id !== S.uid && h('button', { type: 'button', class: 'btn sm p', title: T.kick, 'aria-label': T.kick,
         onclick: () => { if (confirm(T.kickConfirm(p.name))) refs.players.child(id).remove(); } }, '✕'));
   }));
+
+  const mySit = $('#mySit');
+  if (document.activeElement !== mySit && sitTimer == null) mySit.value = S.customSits[S.uid] || '';
+  paintSit();
 
   const ctl = $('#lobbyCtl'), st = settings(), n = eligible().length;
   if (lobbyCtlKey !== (host ? 'host' : 'guest')) {
@@ -1406,7 +1538,9 @@ function refreshGame() {
   // --- ситуація й підказка ---
   keyed('sit', r, () => {
     const el = $('#mSit');
-    el.textContent = SITUATIONS[toArr(ph.sits)[r]] || '…';
+    const sit = toArr(ph.sits)[r];
+    el.textContent = sitText(sit);
+    if (typeof sit === 'string') el.append(h('small', {}, T.sitFromPlayer));
     el.classList.remove('flipin'); void el.offsetWidth; el.classList.add('flipin');
   });
   const note = $('#mNote');
@@ -1527,7 +1661,8 @@ function mountFinal(root) {
 function refreshFinal() {
   const sc = scores(), host = isHost();
   const ids = order().slice().sort((a, b) => sc[b] - sc[a] || (a < b ? -1 : 1));
-  keyed('final', JSON.stringify([ids.map(id => [id, sc[id], !!S.players[id]]), host]), () => {
+  const best = bestMeme();
+  keyed('final', JSON.stringify([ids.map(id => [id, sc[id], !!S.players[id]]), host, best]), () => {
     const medals = ['🏆', '🥈', '🥉'];
     $('#finBox').replaceChildren(...[
       h('div', { class: 'alhead' }, h('h1', {}, T.finalTitle)),
@@ -1542,9 +1677,105 @@ function refreshFinal() {
         const p = S.players[id];
         return h('div', { class: 'rank' }, h('span', { class: 'n' }, (i + 4) + '.'), avatarEl(p), h('span', { class: 'grow' }, p ? p.name : '—'), h('span', {}, T.points(sc[id])));
       }),
+      best && h('div', { class: 'card best stack' },
+        h('div', { class: 'lbl' }, T.bestMeme),
+        h('div', { class: 'bsit' }, sitText(toArr(S.phase.sits)[best.r])),
+        h('img', { src: memeUrl(best.card), alt: '', draggable: false, onclick: () => openZoom(best.card) }),
+        h('div', { class: 'hint', style: { fontWeight: 800 } }, T.bestBy((S.players[best.id] || {}).name || '—', best.votes))),
+      winnerIds().length > 0 && h('div', { class: 'cardbtns' },
+        h('button', { type: 'button', class: 'btn g', onclick: saveWinnerCard }, T.saveCard),
+        canCopyImage() && h('button', { type: 'button', class: 'btn w', onclick: copyWinnerCard }, T.copyCard)),
       h('div', { class: 'alctl' }, reactBar(), host && h('button', { type: 'button', class: 'btn big p', onclick: () => endGame(false) }, T.newGame))
     ].filter(Boolean));
   });
+}
+
+/* ---------- картка переможця (PNG для чату) ---------- */
+const loadImg = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+function wrapText(x, text, maxW) {
+  const lines = []; let line = '';
+  for (const word of String(text).split(/\s+/)) {
+    const next = line ? line + ' ' + word : word;
+    if (line && x.measureText(next).width > maxW) { lines.push(line); line = word; } else line = next;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+async function winnerCardBlob() {
+  const W = 1080, P = 56, IW = W - P * 2, ids = winnerIds(), sc = scores(), best = bestMeme(), first = S.players[ids[0]];
+  const F_TITLE = '900 40px Unbounded, "Arial Black", sans-serif', F_NAME = '900 46px Unbounded, "Arial Black", sans-serif';
+  const F_LBL = '800 24px Manrope, sans-serif', F_SIT = '800 34px Manrope, sans-serif';
+  try { await Promise.all([F_TITLE, F_NAME, F_LBL, F_SIT].map(f => document.fonts.load(f, 'Жж'))); } catch (e) {}
+  const [ava, meme] = await Promise.all([
+    first && isAva(first.avatar) ? loadImg(avaUrl(first.avatar)).catch(() => null) : null,
+    best ? loadImg(memeUrl(best.card)).catch(() => null) : null
+  ]);
+  const cv = document.createElement('canvas'), x = cv.getContext('2d');
+  const AV = 150, nameW = IW - AV - 72;
+  x.font = F_NAME;
+  const names = wrapText(x, ids.map(id => (S.players[id] || {}).name || '—').join(', '), nameW);
+  const boxH = Math.max(AV + 48, names.length * 58 + 120);
+  x.font = F_SIT;
+  const sitLines = best ? wrapText(x, sitText(toArr(S.phase.sits)[best.r]), IW) : [];
+  const memeH = meme ? Math.min(IW * meme.height / meme.width, 820) : 0;
+  const bestTop = P + 120 + boxH + 44;
+  cv.width = W;
+  cv.height = best ? bestTop + 40 + sitLines.length * 44 + 20 + memeH + 62 + P : bestTop + P - 44;
+
+  x.fillStyle = C.bg; x.fillRect(0, 0, W, cv.height);
+  x.textBaseline = 'top';
+  x.save(); x.translate(P, P); x.scale(.8, .8);
+  x.fillStyle = C.y; x.strokeStyle = C.k; x.lineWidth = 3;
+  x.beginPath(); x.arc(50, 50, 48, 0, Math.PI * 2); x.fill(); x.stroke();
+  x.translate(4, 4); x.scale(.92, .92);
+  x.fillStyle = C.k; x.fill(new Path2D(LOGO_PATH));
+  x.restore();
+  x.fillStyle = C.k; x.font = F_TITLE; x.fillText(T.appName, P + 100, P + 2);
+  x.font = F_LBL; x.fillText(T.cardRoom(S.room), P + 100, P + 50);
+
+  const top = P + 120;
+  x.fillStyle = C.k; x.fillRect(P + 7, top + 7, IW, boxH);
+  x.fillStyle = C.y; x.fillRect(P, top, IW, boxH);
+  x.lineWidth = 4; x.strokeStyle = C.k; x.strokeRect(P, top, IW, boxH);
+  const ax = P + 24, ay = top + (boxH - AV) / 2;
+  x.save(); x.beginPath(); x.arc(ax + AV / 2, ay + AV / 2, AV / 2, 0, Math.PI * 2);
+  x.fillStyle = okColor(first && first.color); x.fill(); x.clip();
+  if (ava) x.drawImage(ava, ax, ay, AV, AV);
+  x.restore();
+  x.beginPath(); x.arc(ax + AV / 2, ay + AV / 2, AV / 2, 0, Math.PI * 2); x.stroke();
+  const tx = ax + AV + 24;
+  x.fillStyle = C.k; x.font = F_LBL; x.fillText('🏆 ' + (ids.length > 1 ? T.winnerMany : T.winnerOne), tx, top + 22);
+  x.font = F_NAME; names.forEach((l, i) => x.fillText(l, tx, top + 56 + i * 58));
+  x.font = F_LBL; x.fillText(T.points(sc[ids[0]]), tx, top + 62 + names.length * 58);
+
+  if (best) {
+    let y = bestTop;
+    x.fillStyle = C.k; x.font = F_LBL; x.fillText(T.bestMeme, P, y); y += 40;
+    x.font = F_SIT; sitLines.forEach(l => { x.fillText(l, P, y); y += 44; }); y += 20;
+    if (meme) {
+      x.fillStyle = '#fff'; x.fillRect(P, y, IW, memeH);
+      const w = memeH * meme.width / meme.height;
+      x.drawImage(meme, P + (IW - w) / 2, y, w, memeH);
+      x.strokeRect(P, y, IW, memeH); y += memeH;
+    }
+    x.fillStyle = C.k; x.font = F_LBL; x.fillText(T.bestBy((S.players[best.id] || {}).name || '—', best.votes), P, y + 22);
+  }
+  return new Promise((res, rej) => cv.toBlob(b => b ? res(b) : rej(new Error('toBlob')), 'image/png'));
+}
+async function saveWinnerCard() {
+  try {
+    const url = URL.createObjectURL(await winnerCardBlob());
+    const a = h('a', { href: url, download: `memologia-${S.room}.png` });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  } catch (e) { console.error(e); toast(T.cardFail); }
+}
+const canCopyImage = () => !!(navigator.clipboard && navigator.clipboard.write && window.ClipboardItem);
+async function copyWinnerCard() {
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': winnerCardBlob() })]);   // проміс, а не готовий blob — інакше Safari відмовить
+    toast(T.cardCopied);
+  } catch (e) { console.error(e); toast(T.cardFail); }
 }
 
 init();

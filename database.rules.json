@@ -233,6 +233,25 @@
         ".validate": "newData.isNumber()"
       }
     },
+    "memHall": {
+      ".read": "auth != null",
+      "$id": {
+        ".write": "auth != null && !data.exists() && $id.matches(/^[0-9]{13}-[A-Z]{4}$/) && root.child('mem').child(newData.child('room').val()).child('meta').child('hostId').val() === auth.uid",
+        ".validate": "newData.hasChildren(['t', 'room', 'names', 'score', 'players'])",
+        "t": { ".validate": "newData.val() === now" },
+        "room": { ".validate": "newData.isString() && newData.val().matches(/^[A-Z]{4}$/) && $id.endsWith(newData.val())" },
+        "names": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80" },
+        "score": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 2000" },
+        "players": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 100" },
+        "avatar": { ".validate": "newData.isString() && newData.val().length <= 16" },
+        "color": { ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)" },
+        "meme": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 1000" },
+        "sit": { ".validate": "newData.isString() && newData.val().length <= 300" },
+        "by": { ".validate": "newData.isString() && newData.val().length <= 24" },
+        "votes": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 100" },
+        "$other": { ".validate": false }
+      }
+    },
     "mem": {
       "$code": {
         ".read": "auth != null",
@@ -320,7 +339,7 @@
           },
           "sits": {
             "$i": {
-              ".validate": "$i.matches(/^[0-9]{1,2}$/) && newData.isNumber() && newData.val() >= 0 && newData.val() < 10000"
+              ".validate": "$i.matches(/^[0-9]{1,2}$/) && ((newData.isNumber() && newData.val() >= 0 && newData.val() < 10000) || (newData.isString() && newData.val().length >= 3 && newData.val().length <= 140))"
             }
           },
           "$other": {
@@ -331,7 +350,7 @@
           ".write": "auth != null && root.child('mem').child($code).child('meta').child('hostId').val() === auth.uid",
           "$pid": {
             "$i": {
-              ".validate": "$i.matches(/^[0-9]{1,2}$/) && newData.isNumber() && newData.val() >= 0 && newData.val() < 1000"
+              ".validate": "$i.matches(/^[0-9]{1,3}$/) && newData.isNumber() && newData.val() >= 0 && newData.val() < 1000"
             }
           }
         },
@@ -353,6 +372,13 @@
               ".write": "auth != null && auth.uid === $pid && root.child('mem').child($code).child('players').child(auth.uid).exists() && root.child('mem').child($code).child('phase').child('state').val() === 'vote'",
               ".validate": "newData.isString() && newData.val().length < 64"
             }
+          }
+        },
+        "customSits": {
+          ".write": "auth != null && !newData.exists() && root.child('mem').child($code).child('meta').child('hostId').val() === auth.uid",
+          "$pid": {
+            ".write": "auth != null && auth.uid === $pid && root.child('mem').child($code).child('players').child(auth.uid).exists() && root.child('mem').child($code).child('phase').child('state').val() === 'lobby'",
+            ".validate": "newData.isString() && newData.val().length >= 3 && newData.val().length <= 140"
           }
         },
         "reactions": {
